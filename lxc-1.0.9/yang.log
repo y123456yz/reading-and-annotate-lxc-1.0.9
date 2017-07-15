@@ -1,0 +1,28 @@
+      lxc-start 1499989333.198 ERROR    lxc_start_ui - lxc_start.c:main:254 - Failed to load rcfile
+      lxc-start 1499989338.869 ERROR    lxc_start_ui - lxc_start.c:main:254 - Failed to load rcfile
+      lxc-start 1500005925.832 WARN     lxc_log - log.c:lxc_log_init:331 - lxc_log_init called with log already initialized
+      lxc-start 1500005925.834 INFO     lxc_conf - conf.c:lxc_create_tty:3817 - tty's configured
+      lxc-start 1500005925.835 INFO     lxc_start - start.c:lxc_init:466 - 'yyz-test' is initialized
+      lxc-start 1500005925.875 ERROR    lxc_conf - conf.c:instantiate_veth:3098 - failed to attach 'veth3UJ82U' to the bridge 'virbr0': No such device
+      lxc-start 1500005925.886 ERROR    lxc_conf - conf.c:lxc_create_network:3390 - failed to create netdev
+      lxc-start 1500005925.886 ERROR    lxc_start - start.c:lxc_spawn:887 - failed to create the network
+      lxc-start 1500005925.886 ERROR    lxc_start - start.c:__lxc_start:1162 - failed to spawn 'yyz-test'
+      lxc-start 1500005925.886 WARN     lxc_conf - conf.c:lxc_delete_autodev:1589 - Failed to locate autodev /dev/.lxc and /dev/.lxc/user.
+      lxc-start 1500005925.886 ERROR    lxc_start_ui - lxc_start.c:main:344 - The container failed to start.
+      lxc-start 1500005925.886 ERROR    lxc_start_ui - lxc_start.c:main:348 - Additional information can be obtained by setting the --logfile and --logpriority options.
+      lxc-start 1500005987.508 WARN     lxc_log - log.c:lxc_log_init:331 - lxc_log_init called with log already initialized
+      lxc-start 1500005987.509 INFO     lxc_conf - conf.c:lxc_create_tty:3817 - tty's configured
+      lxc-start 1500005987.509 INFO     lxc_start - start.c:lxc_init:466 - 'yyz-test' is initialized
+      lxc-start 1500005987.551 ERROR    lxc_conf - conf.c:instantiate_veth:3098 - failed to attach 'vethII6XIY' to the bridge 'virbr0': No such device
+      lxc-start 1500005987.566 ERROR    lxc_conf - conf.c:lxc_create_network:3390 - failed to create netdev
+      lxc-start 1500005987.566 ERROR    lxc_start - start.c:lxc_spawn:887 - failed to create the network
+      lxc-start 1500005987.566 ERROR    lxc_start - start.c:__lxc_start:1162 - failed to spawn 'yyz-test'
+      lxc-start 1500005987.566 WARN     lxc_conf - conf.c:lxc_delete_autodev:1589 - Failed to locate autodev /dev/.lxc and /dev/.lxc/user.
+      lxc-start 1500005987.566 ERROR    lxc_start_ui - lxc_start.c:main:344 - The container failed to start.
+      lxc-start 1500005987.566 ERROR    lxc_start_ui - lxc_start.c:main:348 - Additional information can be obtained by setting the --logfile and --logpriority options.
+      lxc-start 1500006094.795 INFO     lxc_start_ui - lxc_start.c:main:266 - using rcfile /usr/local/var/lib/lxc/yyz-test/config
+      lxc-start 1500006094.795 WARN     lxc_log - log.c:lxc_log_init:331 - lxc_log_init called with log already initialized
+      lxc-start 1500006094.796 ERROR    lxc_start_ui - lxc_start.c:main:298 - Executing '/sbin/init' with no configuration file may crash the host
+      lxc-start 1500006616.761 INFO     lxc_start_ui - lxc_start.c:main:266 - using rcfile /usr/local/var/lib/lxc/yyz-test/config
+      lxc-start 1500006616.761 WARN     lxc_log - log.c:lxc_log_init:331 - lxc_log_init called with log already initialized
+      lxc-start 1500006616.762 ERROR    lxc_start_ui - lxc_start.c:main:298 - Executing '/sbin/init' with no configuration file may crash the host
