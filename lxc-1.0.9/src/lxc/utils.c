@@ -630,6 +630,7 @@ char *lxc_string_join(const char *sep, const char **parts, bool use_as_prefix)
 	return result;
 }
 
+//  /a/b/c按照/拆分a  b  c然后存入components
 char **lxc_normalize_path(const char *path)
 {
 	char **components;
@@ -1000,6 +1001,7 @@ uint64_t fnv_64a_buf(void *buf, size_t len, uint64_t hval)
  * out would be too much work to be worth it.
  */
 #define LINELEN 4096
+//检测根文件系统是否可以共享
 int detect_shared_rootfs(void)
 {
 	char buf[LINELEN], *p;

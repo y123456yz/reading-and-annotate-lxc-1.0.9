@@ -34,6 +34,7 @@
 
 lxc_log_define(lxc_af_unix, lxc);
 
+//lxc-console执行时会创建并连接/var/lib/lxc/command（socket，不过该socket不是存在于文件系统上，而是内存里），可通过netstat -xa查看
 int lxc_abstract_unix_open(const char *path, int type, int flags)
 {
 	int fd;

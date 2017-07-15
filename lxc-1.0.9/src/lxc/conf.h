@@ -44,7 +44,7 @@ typedef void * scmp_filter_ctx;
 
 enum {
 	LXC_NET_EMPTY,
-	LXC_NET_VETH,
+	LXC_NET_VETH,   //lxc.network.type = veth
 	LXC_NET_MACVLAN,
 	LXC_NET_PHYS,
 	LXC_NET_VLAN,
@@ -118,19 +118,19 @@ union netdev_p {
  * @upscript   : a script filename to be executed during interface configuration
  * @downscript : a script filename to be executed during interface destruction
  */
-struct lxc_netdev {
-	int type;
+struct lxc_netdev { //解析配置文件的lxc.network相关配置项获取
+	int type; //LXC_NET_VETH等
 	int flags;
-	int ifindex;
-	char *link;
+	int ifindex; //每个网卡在内核都有对应的index,赋值见instantiate_veth  存储的是容器端的网卡的index，可以参考instantiate_veth
+	char *link;//lxc.network.link = virbr0中的virbro字符串
 	char *name;
 	char *hwaddr;
 	char *mtu;
 	union netdev_p priv;
 	struct lxc_list ipv4;
 	struct lxc_list ipv6;
-	struct in_addr *ipv4_gateway;
-	bool ipv4_gateway_auto;
+	struct in_addr *ipv4_gateway; //赋值见config_network_ipv4_gateway
+	bool ipv4_gateway_auto; //赋值见config_network_ipv4_gateway
 	struct in6_addr *ipv6_gateway;
 	bool ipv6_gateway_auto;
 	char *upscript;
@@ -186,9 +186,9 @@ struct lxc_pty_info {
  * Defines the number of tty configured and contains the
  * instantiated ptys
  * @nbtty = number of configured ttys
- */
-struct lxc_tty_info {
-	int nbtty;
+ */ //lxc_conf.tty_info成员是该结构
+struct lxc_tty_info {//赋值生效见lxc_create_tty
+	int nbtty; //配置的lxc.tty数
 	struct lxc_pty_info *pty_info;
 };
 
@@ -280,11 +280,13 @@ enum lxchooks {
 	LXCHOOK_START, LXCHOOK_POSTSTOP, LXCHOOK_CLONE, NUM_LXC_HOOKS};
 extern char *lxchook_names[NUM_LXC_HOOKS];
 
+//lxc_conf.saved_nics为该类型
 struct saved_nic {
-	int ifindex;
-	char *orig_name;
+	int ifindex; //物理网卡对应的index
+	char *orig_name; //lxc.network.link配置，见save_phys_nics
 };
 
+//赋值见parse_line->lxc_getconfig  config
 struct lxc_conf {
 	int is_execute;
 	char *fstab;
@@ -296,18 +298,22 @@ struct lxc_conf {
 	struct utsname *utsname;
 	struct lxc_list cgroup;
 	struct lxc_list id_map;
-	struct lxc_list network;
+	//赋值是通过解析配置文件中的lxc.network.xxx相关的配置项，然后通过get_netdev_from_key加入到链表
+	struct lxc_list network; 
 	struct saved_nic *saved_nics;
-	int num_savednics;
+	int num_savednics; //赋值见save_phys_nics
 	int auto_mounts;
 	struct lxc_list mount_list;
 	struct lxc_list caps;
 	struct lxc_list keepcaps;
-	struct lxc_tty_info tty_info;
+	//生效见lxc_create_tty
+	struct lxc_tty_info tty_info; 
 	struct lxc_console console;
 	struct lxc_rootfs rootfs;
 	char *ttydir;
 	int close_all_fds;
+
+	//赋值见config_hook，生效见run_lxc_hooks 解析到lxc.hook.pre-start等配置，然后执行对应配置的脚本
 	struct lxc_list hooks[NUM_LXC_HOOKS];
 
 	char *lsm_aa_profile;
@@ -317,11 +323,12 @@ struct lxc_conf {
 #if HAVE_SCMP_FILTER_CTX
 	scmp_filter_ctx seccomp_ctx;
 #endif
-	int maincmd_fd;
+	int maincmd_fd;  //域套接字对应的链接sock
 	int autodev;  // if 1, mount and fill a /dev at start
 	int haltsignal; // signal used to halt container
 	int stopsignal; // signal used to hard stop container
 	int kmsg;  // if 1, create /dev/kmsg symlink
+	//赋值见  lxc_config_read   -f指定的配置文件
 	char *rcfile;	// Copy of the top level rcfile we read
 
 	// Logfile and logleve can be set in a container config file.

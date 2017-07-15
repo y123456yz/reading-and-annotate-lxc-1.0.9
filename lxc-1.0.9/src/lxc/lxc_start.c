@@ -58,13 +58,14 @@ lxc_log_define(lxc_start_ui, lxc);
 
 static struct lxc_list defines;
 
+//判断文件可写权限，获取confpath全路径
 static int ensure_path(char **confpath, const char *path)
 {
 	int err = -1, fd;
 	char *fullpath = NULL;
 
 	if (path) {
-		if (access(path, W_OK)) {
+		if (access(path, W_OK)) { //文件是否写，不可写
 			fd = creat(path, 0600);
 			if (fd < 0 && errno != EEXIST) {
 				SYSERROR("failed to create '%s'", path);
@@ -140,6 +141,7 @@ static int open_ns(int pid, const char *ns_proc_name) {
 	return fd;
 }
 
+//见my_args
 static int my_parser(struct lxc_arguments* args, int c, char* arg)
 {
 	switch (c) {
@@ -231,7 +233,7 @@ int main(int argc, char *argv[])
 		return err;
 	lxc_log_options_no_override();
 
-	const char *lxcpath = my_args.lxcpath[0];
+	const char *lxcpath = my_args.lxcpath[0]; //默认/usr/local/var/lib/lxc
 
 	/*
 	 * rcfile possibilities:
@@ -248,7 +250,7 @@ int main(int argc, char *argv[])
 			return err;
 		}
 		c->clear_config(c);
-		if (!c->load_config(c, rcfile)) {
+		if (!c->load_config(c, rcfile)) { //rcfile为-f参数指定
 			ERROR("Failed to load rcfile");
 			lxc_container_put(c);
 			return err;
@@ -286,8 +288,9 @@ int main(int argc, char *argv[])
 	 */
 	if (!c->lxc_conf)
 		c->lxc_conf = lxc_conf_init();
-	conf = c->lxc_conf;
+	conf = c->lxc_conf; //解析的配置信息全部存入这里面
 
+    //如果命令行和配置文件都有相同项的配置，则以命令行为准
 	if (lxc_config_define_load(&defines, conf))
 		goto out;
 
@@ -335,7 +338,7 @@ int main(int argc, char *argv[])
 	if (my_args.close_all_fds)
 		c->want_close_all_fds(c, true);
 
-	err = c->start(c, 0, args) ? 0 : 1;
+	err = c->start(c, 0, args) ? 0 : 1; //lxcapi_start
 
 	if (err) {
 		ERROR("The container failed to start.");

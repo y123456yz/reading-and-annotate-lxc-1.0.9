@@ -969,6 +969,7 @@ out_close:
 	goto out;
 }
 
+//链接sock
 int lxc_cmd_init(const char *name, struct lxc_handler *handler,
 		 const char *lxcpath)
 {
@@ -986,6 +987,7 @@ int lxc_cmd_init(const char *name, struct lxc_handler *handler,
 	if (fill_sock_name(offset, len, name, lxcpath, NULL))
 		return -1;
 
+    //lxc-console执行时会创建并连接/var/lib/lxc/command（socket，不过该socket不是存在于文件系统上，而是内存里），可通过netstat -xa查看
 	fd = lxc_abstract_unix_open(path, SOCK_STREAM, 0);
 	if (fd < 0) {
 		ERROR("failed (%d) to create the command service point %s", errno, offset);

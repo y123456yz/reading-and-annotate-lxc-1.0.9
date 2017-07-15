@@ -190,8 +190,9 @@ static int instantiate_phys(struct lxc_handler *, struct lxc_netdev *);
 static int instantiate_empty(struct lxc_handler *, struct lxc_netdev *);
 static int instantiate_none(struct lxc_handler *, struct lxc_netdev *);
 
+//netdev_conf和lxc_network_types对应
 static  instantiate_cb netdev_conf[LXC_NET_MAXCONFTYPE + 1] = {
-	[LXC_NET_VETH]    = instantiate_veth,
+	[LXC_NET_VETH]    = instantiate_veth,  //lxc.network.type = veth
 	[LXC_NET_MACVLAN] = instantiate_macvlan,
 	[LXC_NET_VLAN]    = instantiate_vlan,
 	[LXC_NET_PHYS]    = instantiate_phys,
@@ -666,7 +667,7 @@ static int mount_rootfs_block(const char *rootfs, const char *target,
  * return -1 on error.
  * return -2 if nothing needed to be pinned.
  * return an open fd (>=0) if we pinned it.
- */
+ */ ////保持根文件系统可写
 int pin_rootfs(const char *rootfs)
 {
 	char absrootfs[MAXPATHLEN];
@@ -3030,6 +3031,7 @@ struct lxc_conf *lxc_conf_init(void)
 	return new;
 }
 
+//lxc.network.type = veth 创建一对虚拟网卡
 static int instantiate_veth(struct lxc_handler *handler, struct lxc_netdev *netdev)
 {
 	char veth1buf[IFNAMSIZ], *veth1;
@@ -3054,7 +3056,7 @@ static int instantiate_veth(struct lxc_handler *handler, struct lxc_netdev *netd
 		/* store away for deconf */
 		memcpy(netdev->priv.veth_attr.veth1, veth1, IFNAMSIZ);
 	}
-
+    
 	snprintf(veth2buf, sizeof(veth2buf), "vethXXXXXX");
 	veth2 = lxc_mkifname(veth2buf);
 	if (!veth2) {
@@ -3062,6 +3064,7 @@ static int instantiate_veth(struct lxc_handler *handler, struct lxc_netdev *netd
 		goto out_delete;
 	}
 
+    //printf("yang test .............. veth1:%s, veth2:%s\r\n", veth1, veth2);   veth1:vethTYDHJ1, veth2:vethHWV7N4
 	err = lxc_veth_create(veth1, veth2);
 	if (err) {
 		ERROR("failed to create veth pair (%s and %s): %s", veth1, veth2,
@@ -3071,7 +3074,7 @@ static int instantiate_veth(struct lxc_handler *handler, struct lxc_netdev *netd
 
 	/* changing the high byte of the mac address to 0xfe, the bridge interface
 	 * will always keep the host's mac address and not take the mac address
-	 * of a container */
+	 * of a container */ //设置网卡MAC地址
 	err = setup_private_host_hw_addr(veth1);
 	if (err) {
 		ERROR("failed to change mac address of host interface '%s': %s",
@@ -3079,7 +3082,7 @@ static int instantiate_veth(struct lxc_handler *handler, struct lxc_netdev *netd
 		goto out_delete;
 	}
 
-	if (netdev->mtu) {
+	if (netdev->mtu) { //设置网卡MTU
 		err = lxc_netdev_set_mtu(veth1, atoi(netdev->mtu));
 		if (!err)
 			err = lxc_netdev_set_mtu(veth2, atoi(netdev->mtu));
@@ -3090,8 +3093,12 @@ static int instantiate_veth(struct lxc_handler *handler, struct lxc_netdev *netd
 		}
 	}
 
+	//  ifconfig br0 10.10.1.1 netmask 255.255.0.0 up  创建虚拟网桥过程
+    //  ifconfig virbr0 10.10.1.1 netmask 255.255.0.0 up
+
+    //printf("yang test .............. link:%s\r\n", netdev->link);  lxc.network.link = virbr0中的virbro字符串
 	if (netdev->link) {
-		err = lxc_bridge_attach(netdev->link, veth1);
+		err = lxc_bridge_attach(netdev->link, veth1); //veth1在宿主机上创建的接口可以在宿主机上通过ifconfig看到
 		if (err) {
 			ERROR("failed to attach '%s' to the bridge '%s': %s",
 				      veth1, netdev->link, strerror(-err));
@@ -3099,7 +3106,7 @@ static int instantiate_veth(struct lxc_handler *handler, struct lxc_netdev *netd
 		}
 	}
 
-	netdev->ifindex = if_nametoindex(veth2);
+	netdev->ifindex = if_nametoindex(veth2); //获取veth2对应的网卡index
 	if (!netdev->ifindex) {
 		ERROR("failed to retrieve the index for %s", veth2);
 		goto out_delete;
@@ -3365,6 +3372,7 @@ int lxc_requests_empty_network(struct lxc_handler *handler)
 	return 0;
 }
 
+//创建虚拟网络接口
 int lxc_create_network(struct lxc_handler *handler)
 {
 	struct lxc_list *network = &handler->conf->network;
@@ -3718,6 +3726,7 @@ again:
 	return freeid;
 }
 
+//获取网络接口netdev->link对应的路由地址
 int lxc_find_gateway_addresses(struct lxc_handler *handler)
 {
 	struct lxc_list *network = &handler->conf->network;
@@ -3742,11 +3751,13 @@ int lxc_find_gateway_addresses(struct lxc_handler *handler)
 			return -1;
 		}
 
+        //if_nametoindex()：指定网络接口名称字符串作为参数；若该接口存在，则返回相应的索引，否则返回0
 		link_index = if_nametoindex(netdev->link);
 		if (!link_index)
 			return -EINVAL;
 
 		if (netdev->ipv4_gateway_auto) {
+		    //获取netdev->link对应的路由地址存到ipv4_gateway
 			if (lxc_ipv4_addr_get(link_index, &netdev->ipv4_gateway)) {
 				ERROR("failed to automatically find ipv4 gateway "
 				      "address from link interface '%s'", netdev->link);
@@ -3766,6 +3777,7 @@ int lxc_find_gateway_addresses(struct lxc_handler *handler)
 	return 0;
 }
 
+//创建tty 
 int lxc_create_tty(const char *name, struct lxc_conf *conf)
 {
 	struct lxc_tty_info *tty_info = &conf->tty_info;
@@ -4383,6 +4395,7 @@ int lxc_setup(struct lxc_handler *handler)
 	return 0;
 }
 
+//执行对应hook配置的脚本
 int run_lxc_hooks(const char *name, char *hook, struct lxc_conf *conf,
 		  const char *lxcpath, char *argv[])
 {

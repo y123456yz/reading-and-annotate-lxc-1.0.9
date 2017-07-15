@@ -100,6 +100,7 @@ static int config_stopsignal(const char *, const char *, struct lxc_conf *);
 static int config_start(const char *, const char *, struct lxc_conf *);
 static int config_group(const char *, const char *, struct lxc_conf *);
 
+//解析到相应配置的回调//parse_line->lxc_getconfig  config
 static struct lxc_config_t config[] = {
 
 	{ "lxc.arch",                 config_personality          },
@@ -246,6 +247,7 @@ static const struct signame signames[] = {
 
 static const size_t config_size = sizeof(config)/sizeof(struct lxc_config_t);
 
+//parse_line->lxc_getconfig
 extern struct lxc_config_t *lxc_getconfig(const char *key)
 {
 	int i;
@@ -450,7 +452,7 @@ static int get_network_netdev_idx(const char *key)
 /*
  * if you have p="lxc.network.0", pass this p+12 and it will return
  * the netdev of the first configured nic
- */
+ */ //通过key在network链表上查找对应的lxc_netdev
 static struct lxc_netdev *get_netdev_from_key(const char *key,
 					      struct lxc_list *network)
 {
@@ -1003,6 +1005,7 @@ static int config_seccomp(const char *key, const char *value,
 	return config_path_item(&lxc_conf->seccomp, value);
 }
 
+//解析lxc.hook.pre-start等  config配置走到这里
 static int config_hook(const char *key, const char *value,
 				 struct lxc_conf *lxc_conf)
 {
@@ -1687,7 +1690,7 @@ static int parse_line(char *buffer, void *data)
 	/* martian option - ignoring it, the commented lines beginning by '#'
 	 * fall in this case
 	 */
-	if (strncmp(line, "lxc.", 4))
+	if (strncmp(line, "lxc.", 4)) //配置必须lxc.开头
 		goto out;
 
 	ret = -1;
@@ -1715,6 +1718,7 @@ static int parse_line(char *buffer, void *data)
 		}
 	}
 
+    //通过key从config中找到对应的回调执行
 	config = lxc_getconfig(key);
 	if (!config) {
 		ERROR("unknown key %s", key);

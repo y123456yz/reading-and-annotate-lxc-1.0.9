@@ -186,6 +186,7 @@ static int match_fd(int fd)
 	return (fd == 0 || fd == 1 || fd == 2);
 }
 
+//清理除lxc相关的其他的fd
 int lxc_check_inherited(struct lxc_conf *conf, int fd_to_ignore)
 {
 	struct dirent *direntp;
@@ -395,7 +396,7 @@ struct lxc_handler *lxc_init(const char *name, struct lxc_conf *conf, const char
 		goto out_free;
 	}
 
-	if (lxc_cmd_init(name, handler, lxcpath))
+	if (lxc_cmd_init(name, handler, lxcpath)) //内部链接用的域套接字
 		goto out_free_name;
 
 	if (lxc_read_seccomp_config(conf) != 0) {
@@ -409,6 +410,9 @@ struct lxc_handler *lxc_init(const char *name, struct lxc_conf *conf, const char
 		goto out_close_maincmd_fd;
 	}
 
+    /* 首先要说明的是，通过此函数并不能添加或修改 shell 进程的环境变量，或者说通过setenv函数设置的环境变量只在本进程，
+    而且是本次执行中有效。如果在某一次运行程序时执行了setenv函数，进程终止后再次运行该程序，上次的设置是无效的，
+    上次设置的环境变量是不能读到的。 */
 	/* Start of environment variable setup for hooks */
 	if (name && setenv("LXC_NAME", name, 1)) {
 		SYSERROR("failed to set environment variable for container name");
@@ -552,6 +556,14 @@ static int must_drop_cap_sys_boot(struct lxc_conf *conf)
 	int status;
 	pid_t pid;
 
+    /*
+    /proc/sys/kernel/ctrl-alt-del 
+    
+    该文件有一个二进制值，该值控制系统在接收到 ctrl+alt+delete 按键组合时如何反应。这两个值表示： 
+    零（0）值表示捕获 ctrl+alt+delete，并将其送至 init 程序。这将允许系统可以完美地关闭和重启，就好象您输入 shutdown 命令一样。 
+    壹（1）值表示不捕获 ctrl+alt+delete，将执行非干净的关闭，就好象直接关闭电源一样。 
+
+    */
 	f = fopen("/proc/sys/kernel/ctrl-alt-del", "r");
 	if (!f) {
 		DEBUG("failed to open /proc/sys/kernel/ctrl-alt-del");
@@ -793,6 +805,7 @@ out_warn_father:
 	return -1;
 }
 
+//LXC_NET_PHYS相关的配置信息存入saved_nics
 static int save_phys_nics(struct lxc_conf *conf)
 {
 	struct lxc_list *iterator;
@@ -843,9 +856,11 @@ static int lxc_spawn(struct lxc_handler *handler)
 		if (handler->conf->inherit_ns_fd[i] != -1)
 			preserve_mask |= ns_info[i].clone_flag;
 
-	if (lxc_sync_init(handler))
+	if (lxc_sync_init(handler)) //:创造一对未命名的、相互连接的UNIX域套接字
 		return -1;
 
+    //设置clone选项，创建新的container
+    //UTS 命名空间包含了运行内核的名称、版本、底层体系结构类型等信息
 	handler->clone_flags = CLONE_NEWPID|CLONE_NEWNS;
 	if (!lxc_list_empty(&handler->conf->id_map)) {
 		INFO("Cloning a new user namespace");
@@ -862,6 +877,7 @@ static int lxc_spawn(struct lxc_handler *handler)
 			 * no longer accessible inside the container. Do this
 			 * before creating network interfaces, since goto
 			 * out_delete_net does not work before lxc_clone. */
+			 //从链接设备中找到网关地址，该设备在容器内不再可访问,要在创建网络接口前执行，
 			if (lxc_find_gateway_addresses(handler)) {
 				ERROR("failed to find gateway addresses");
 				lxc_sync_fini(handler);
@@ -878,6 +894,7 @@ static int lxc_spawn(struct lxc_handler *handler)
 			}
 		}
 
+        //LXC_NET_PHYS相关的配置信息存入saved_nics
 		if (save_phys_nics(handler->conf)) {
 			ERROR("failed to save physical nic info");
 			goto out_abort;
@@ -960,6 +977,7 @@ static int lxc_spawn(struct lxc_handler *handler)
 	if (attach_ns(saved_ns_fd))
 		WARN("failed to restore saved namespaces");
 
+    //关闭子进程的fd[0]
 	lxc_sync_fini_child(handler);
 
 	/* map the container uids - the container became an invalid
@@ -977,6 +995,7 @@ static int lxc_spawn(struct lxc_handler *handler)
 		goto out_delete_net;
 	}
 
+    //等待新的子进程告诉自己可以做LXC_SYNC_CONFIGURE这一步，参见do_start中的lxc_sync_barrier_parent，接下来交替完成各个LXC_SYNC_XXX
 	if (lxc_sync_wait_child(handler, LXC_SYNC_CONFIGURE)) {
 		failed_before_rename = 1;
 		goto out_delete_net;
@@ -1101,6 +1120,7 @@ int get_netns_fd(int pid)
 	return fd;
 }
 
+//lxcpath也就是config_path
 int __lxc_start(const char *name, struct lxc_conf *conf,
 		struct lxc_operations* ops, void *data, const char *lxcpath)
 {
@@ -1114,8 +1134,8 @@ int __lxc_start(const char *name, struct lxc_conf *conf,
 		ERROR("failed to initialize the container");
 		return -1;
 	}
-	handler->ops = ops;
-	handler->data = data;
+	handler->ops = ops;  //start
+	handler->data = data; //post_start
 
 	if (must_drop_cap_sys_boot(handler->conf)) {
 		#if HAVE_SYS_CAPABILITY_H
@@ -1144,7 +1164,7 @@ int __lxc_start(const char *name, struct lxc_conf *conf,
 		}
 	}
 
-	err = lxc_spawn(handler);
+	err = lxc_spawn(handler); //核心在这里面
 	if (err) {
 		ERROR("failed to spawn '%s'", name);
 		goto out_fini_nonet;

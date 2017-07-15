@@ -115,7 +115,7 @@ const char *lxc_global_config_value(const char *option_name)
 	char *user_default_config_path = NULL;
 	char *user_lxc_path = NULL;
 	char *user_cgroup_pattern = NULL;
-
+    
 	if (geteuid() > 0) {
 		const char *user_home = getenv("HOME");
 		if (!user_home)
@@ -131,11 +131,12 @@ const char *lxc_global_config_value(const char *option_name)
 		user_cgroup_pattern = strdup("lxc/%n");
 	}
 	else {
-		user_config_path = strdup(LXC_GLOBAL_CONF);
-		user_default_config_path = strdup(LXC_DEFAULT_CONFIG);
-		user_lxc_path = strdup(LXCPATH);
-		user_cgroup_pattern = strdup(DEFAULT_CGROUP_PATTERN);
+		user_config_path = strdup(LXC_GLOBAL_CONF); //默认参考src/python-lxc/Makefile
+		user_default_config_path = strdup(LXC_DEFAULT_CONFIG); //默认参考src/python-lxc/Makefile
+		user_lxc_path = strdup(LXCPATH); //默认参考src/python-lxc/Makefile
+		user_cgroup_pattern = strdup(DEFAULT_CGROUP_PATTERN); //默认参考src/python-lxc/Makefile
 	}
+
 
 	const char * const (*ptr)[2];
 	size_t i;

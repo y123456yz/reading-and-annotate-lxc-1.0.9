@@ -95,6 +95,7 @@ static void unlock_mutex(pthread_mutex_t *l)
 	}
 }
 
+//"/lxc/lock/" + $lxcpath + "/" + $lxcname   文件锁位置
 static char *lxclock_name(const char *p, const char *n)
 {
 	int ret;
@@ -158,6 +159,7 @@ static sem_t *lxc_new_unnamed_sem(void)
 	return s;
 }
 
+//name为NULL，则创建信号量锁，否则创建文件锁
 struct lxc_lock *lxc_newlock(const char *lxcpath, const char *name)
 {
 	struct lxc_lock *l;

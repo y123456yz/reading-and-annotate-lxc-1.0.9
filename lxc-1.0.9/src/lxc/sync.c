@@ -114,6 +114,7 @@ int lxc_sync_wake_child(struct lxc_handler *handler, int sequence)
 	return __sync_wake(handler->sv[1], sequence);
 }
 
+//:创造一对未命名的、相互连接的UNIX域套接字 ,关闭在lxc_sync_fini
 int lxc_sync_init(struct lxc_handler *handler)
 {
 	int ret;

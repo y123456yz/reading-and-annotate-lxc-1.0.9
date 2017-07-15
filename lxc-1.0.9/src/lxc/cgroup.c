@@ -28,12 +28,12 @@
 
 lxc_log_define(lxc_cgroup, lxc);
 
-static struct cgroup_ops *ops = NULL;
+static struct cgroup_ops *ops = NULL; //赋值见cgfs_ops_init  赋值为cgfs_ops
 
 extern struct cgroup_ops *cgfs_ops_init(void);
 extern struct cgroup_ops *cgm_ops_init(void);
 
-__attribute__((constructor))
+__attribute__((constructor))  //将在main函数前执行
 void cgroup_ops_init(void)
 {
 	if (ops) {
@@ -60,7 +60,7 @@ bool cgroup_init(struct lxc_handler *handler)
 
 	if (ops) {
 		INFO("cgroup driver %s initing for %s", ops->name, handler->name);
-		handler->cgroup_data = ops->init(handler->name);
+		handler->cgroup_data = ops->init(handler->name); //cgfs_init
 	}
 	return handler->cgroup_data != NULL;
 }
@@ -77,7 +77,7 @@ void cgroup_destroy(struct lxc_handler *handler)
 bool cgroup_create(struct lxc_handler *handler)
 {
 	if (ops)
-		return ops->create(handler->cgroup_data);
+		return ops->create(handler->cgroup_data); //cgfs_create
 	return false;
 }
 

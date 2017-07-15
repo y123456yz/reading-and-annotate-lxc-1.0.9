@@ -62,25 +62,32 @@ struct cgroup_mount_point;
 /*
  * cgroup_meta_data: the metadata about the cgroup infrastructure on this
  *                   host
- */
-struct cgroup_meta_data {
+ */ //cgfs_data.meta成员
+struct cgroup_meta_data { //初始化使用见cgfs_init
 	ptrdiff_t ref; /* simple refcount */
-	struct cgroup_hierarchy **hierarchies;
-	struct cgroup_mount_point **mount_points;
-	int maximum_hierarchy;
+	struct cgroup_hierarchy **hierarchies; ////proc/self/cgroup中的信息  find_cgroup_hierarchies
+	struct cgroup_mount_point **mount_points; //cgroup mount /proc/self/mountinf相关信息存入该结构中，见find_hierarchy_mountpts o
+	int maximum_hierarchy; //赋值见find_cgroup_hierarchies
 };
 
 /*
  * cgroup_hierarchy: describes a single cgroup hierarchy
  *                   (may have multiple mount points)
  */
-struct cgroup_hierarchy {
-	int index;
+struct cgroup_hierarchy { //cgroup_meta_data.hierarchies成员
+	int index; ///proc/self/cgroup中每行的子系统编号
 	bool used; /* false if the hierarchy should be ignored by lxc */
-	char **subsystems;
+	char **subsystems; //例如2:net_prio,net_cls:/中的net_prio,net_cls
+
+
+    //需要保证mount的挂载点必须在/proc/cgroups中存在
+	//cgroup on /sys/fs/cgroup/devices type cgroup (rw,nosuid,nodev,noexec,relatime,devices)满足要求
+	//cgroup on /xxaa/bb type cgroup (rw,nosuid,nodev,noexec,relatime,devices)不满足要求
+
+	//只读的mount point加入ro_absolute_mount_point  其他的加入rw_absolute_mount_point  只存放从更目录mount的
 	struct cgroup_mount_point *rw_absolute_mount_point;
 	struct cgroup_mount_point *ro_absolute_mount_point;
-	struct cgroup_mount_point **all_mount_points;
+	struct cgroup_mount_point **all_mount_points; //所有的mount，包括跟目录的和非根目录的
 	size_t all_mount_point_capacity;
 };
 
@@ -88,11 +95,12 @@ struct cgroup_hierarchy {
  * cgroup_mount_point: a mount point to where a hierarchy
  *                     is mounted to
  */
-struct cgroup_mount_point {
+struct cgroup_mount_point {//参考find_hierarchy_mountpts
 	struct cgroup_hierarchy *hierarchy;
-	char *mount_point;
-	char *mount_prefix;
-	bool read_only;
+	//cgroup on /sys/fs/cgroup/devices type cgroup (rw,nosuid,nodev,noexec,relatime,devices)中的/sys/fs/cgroup/devices
+	char *mount_point;//挂载点
+	char *mount_prefix; //lxcfs默认为/     赋值见find_hierarchy_mountpts
+	bool read_only; //是否只读
 	bool need_cpuset_init;
 };
 
@@ -105,21 +113,22 @@ struct cgroup_mount_point {
  * This is not used with cgmanager.
  */
 struct cgroup_process_info {
-	struct cgroup_process_info *next;
+	struct cgroup_process_info *next; //cgroup_process_info通过next链接到一起，可以参考cgroup_process_info
 	struct cgroup_meta_data *meta_ref;
-	struct cgroup_hierarchy *hierarchy;
-	char *cgroup_path;
+	struct cgroup_hierarchy *hierarchy; //cgourp文件每行的最前面的数字  如11:pids:/ 中的11
+	char *cgroup_path; //cgourp中的例如11:pids:/ 中的/
 	char *cgroup_path_sub;
 	char **created_paths;
 	size_t created_paths_capacity;
 	size_t created_paths_count;
+	//使用见lxc_cgroupfs_create
 	struct cgroup_mount_point *designated_mount_point;
 };
 
-struct cgfs_data {
-	char *name;
-	const char *cgroup_pattern;
-	struct cgroup_meta_data *meta;
+struct cgfs_data { //初始化见cgfs_init
+	char *name; //容器名
+	const char *cgroup_pattern; //默认//默认/lxc/%n  DEFAULT_CGROUP_PATTERN
+	struct cgroup_meta_data *meta; //赋值见lxc_cgroup_load_meta2
 	struct cgroup_process_info *info;
 };
 
@@ -239,6 +248,7 @@ static struct cgroup_meta_data *lxc_cgroup_load_meta()
 			return NULL;
 	}
 
+	//printf("yang test ..... cgroup_use:%s\r\n", cgroup_use); //打印NULL
 	md = lxc_cgroup_load_meta2((const char **)cgroup_use_list);
 	saved_errno = errno;
 	lxc_free_array((void **)cgroup_use_list, free);
@@ -246,7 +256,9 @@ static struct cgroup_meta_data *lxc_cgroup_load_meta()
 	return md;
 }
 
-/* Step 1: determine all kernel subsystems */
+//解析/proc/cgroups中的内容到kernel_subsystems数组
+/* Step 1: determine all kernel subsystems */ 
+//3个step分别为find_cgroup_subsystems(/proc/cgroups)   find_cgroup_hierarchies(/proc/self/cgroup)  find_hierarchy_mountpts(/proc/self/mountinfo)
 static bool find_cgroup_subsystems(char ***kernel_subsystems)
 {
 	FILE *proc_cgroups;
@@ -257,6 +269,22 @@ static bool find_cgroup_subsystems(char ***kernel_subsystems)
 	size_t kernel_subsystems_capacity = 0;
 	int r;
 
+    /*
+    [root@localhost lxc-lxc-1.0.9]# cat /proc/cgroups
+    #subsys_name    hierarchy       num_cgroups     enabled
+    cpuset  7       2       1
+    cpu     5       2       1
+    cpuacct 5       2       1
+    memory  6       2       1
+    devices 3       18      1
+    freezer 10      2       1
+    net_cls 2       2       1
+    blkio   8       2       1
+    perf_event      4       2       1
+    hugetlb 9       2       1
+    pids    11      2       1
+    net_prio        2       2       1
+    */
 	proc_cgroups = fopen_cloexec("/proc/cgroups", "r");
 	if (!proc_cgroups)
 		return false;
@@ -264,9 +292,9 @@ static bool find_cgroup_subsystems(char ***kernel_subsystems)
 	while (getline(&line, &sz, proc_cgroups) != -1) {
 		char *tab1;
 		char *tab2;
-		int hierarchy_number;
+		int hierarchy_number; //hierarchy_number   为hierarchy列中对应的内容
 
-		if (line[0] == '#')
+		if (line[0] == '#') //跳过#开始的行，例如#subsys_name    hierarchy       num_cgroups     enabled
 			continue;
 		if (!line[0])
 			continue;
@@ -289,10 +317,13 @@ static bool find_cgroup_subsystems(char ***kernel_subsystems)
 		r = lxc_grow_array((void ***)kernel_subsystems, &kernel_subsystems_capacity, kernel_subsystems_count + 1, 12);
 		if (r < 0)
 			goto out;
-		(*kernel_subsystems)[kernel_subsystems_count] = strdup(line);
+		(*kernel_subsystems)[kernel_subsystems_count] = strdup(line); //cpuset  7       2       1行中的cpuset,代表subsys_name
 		if (!(*kernel_subsystems)[kernel_subsystems_count])
 			goto out;
 		kernel_subsystems_count++;
+
+        //yang test ...........cpuset, 7  1
+		//printf("yang test ...........%s, %d  %d\r\n",  line, hierarchy_number, (int)kernel_subsystems_count);
 	}
 	bret = true;
 
@@ -305,7 +336,10 @@ out:
 /* Step 2: determine all hierarchies (by reading /proc/self/cgroup),
  *         since mount points don't specify hierarchy number and
  *         /proc/cgroups does not contain named hierarchies
- */
+ */ 
+
+//3个step分别为find_cgroup_subsystems(/proc/cgroups)   find_cgroup_hierarchies(/proc/self/cgroup)  find_hierarchy_mountpts(/proc/self/mountinfo)
+//注意和lxc_cgroupfs_create->lxc_cgroup_process_info_get_init的区别
 static bool find_cgroup_hierarchies(struct cgroup_meta_data *meta_data,
 	bool all_kernel_subsystems, bool all_named_subsystems,
 	const char **subsystem_whitelist)
@@ -383,6 +417,8 @@ static bool find_cgroup_hierarchies(struct cgroup_meta_data *meta_data,
 
 		h->index = hierarchy_number;
 		h->subsystems = lxc_string_split_and_trim(colon1, ',');
+		//yang test ...dd......5, cpuacct,cpu
+		//printf("yang test ...dd......%d, %s\r\n", hierarchy_number, colon1);
 		if (!h->subsystems)
 			goto out;
 		/* see if this hierarchy should be considered */
@@ -413,8 +449,21 @@ out:
 	return bret;
 }
 
+/*
+[root@localhost lxc-lxc-1.0.9]# cat /proc/self/mountinfo
+17 61 0:16 / /sys rw,nosuid,nodev,noexec,relatime shared:6 - sysfs sysfs rw,seclabel
+18 61 0:3 / /proc rw,nosuid,nodev,noexec,relatime shared:5 - proc proc rw
+19 61 0:5 / /dev rw,nosuid shared:2 - devtmpfs devtmpfs rw,seclabel,size=1438752k,nr_inodes=359688,mode=755
+20 17 0:15 / /sys/kernel/security rw,nosuid,nodev,noexec,relatime shared:7 - securityfs securityfs rw
+21 19 0:17 / /dev/shm rw,nosuid,nodev shared:3 - tmpfs tmpfs rw,seclabel
+22 19 0:11 / /dev/pts rw,nosuid,noexec,relatime shared:4 - devpts devpts rw,seclabel,gid=5,mode=620,ptmxmode=000
+*/
+
 /* Step 3: determine all mount points of each hierarchy */
-static bool find_hierarchy_mountpts( struct cgroup_meta_data *meta_data, char **kernel_subsystems)
+
+//3个step分别为find_cgroup_subsystems(/proc/cgroups)   find_cgroup_hierarchies(/proc/self/cgroup)  find_hierarchy_mountpts(/proc/self/mountinfo)
+//kernel_subsystems是从proc/cgroups获取的内容
+static bool find_hierarchy_mountpts( struct cgroup_meta_data *meta_data, char **kernel_subsystems) 
 {
 	bool bret = false;
 	FILE *proc_self_mountinfo;
@@ -478,7 +527,7 @@ static bool find_hierarchy_mountpts( struct cgroup_meta_data *meta_data, char **
 		if (i != j + 4)
 			continue;
 
-		/* not a cgroup filesystem */
+		/* not a cgroup filesystem */  //只获取cgroup文件系统
 		if (strcmp(tokens[j + 1], "cgroup") != 0) {
 			if (strcmp(tokens[j + 1], "fuse.lxcfs") != 0)
 				continue;
@@ -495,7 +544,10 @@ static bool find_hierarchy_mountpts( struct cgroup_meta_data *meta_data, char **
 			goto out;
 
 		h = NULL;
-		for (k = 0; k <= meta_data->maximum_hierarchy; k++) {
+		for (k = 0; k <= meta_data->maximum_hierarchy; k++) { 
+		//需要保证mount的挂载点必须在/proc/cgroups中存在
+		//cgroup on /sys/fs/cgroup/devices type cgroup (rw,nosuid,nodev,noexec,relatime,devices)满足要求
+		//cgroup on /xxaa/bb type cgroup (rw,nosuid,nodev,noexec,relatime,devices)不满足要求
 			if (meta_data->hierarchies[k] &&
 			    meta_data->hierarchies[k]->subsystems[0] &&
 			    lxc_string_in_array(meta_data->hierarchies[k]->subsystems[0], (const char **)subsystems)) {
@@ -530,14 +582,22 @@ static bool find_hierarchy_mountpts( struct cgroup_meta_data *meta_data, char **
 
 		if (!strcmp(mount_point->mount_prefix, "/")) {
 			if (mount_point->read_only) {
-				if (!h->ro_absolute_mount_point)
+				if (!h->ro_absolute_mount_point) //只读的mount point加入ro_absolute_mount_point
 					h->ro_absolute_mount_point = mount_point;
 			} else {
-				if (!h->rw_absolute_mount_point)
+				if (!h->rw_absolute_mount_point) //其他的加入rw_absolute_mount_point
 					h->rw_absolute_mount_point = mount_point;
 			}
 		}
 
+        /*
+         ....mount_prefix:/, mount_point:/sys/fs/cgroup/systemd, read_only:0
+         ....mount_prefix:/, mount_point:/sys/fs/cgroup/net_cls,net_prio, read_only:0
+         ....mount_prefix:/, mount_point:/sys/fs/cgroup/devices, read_only:0
+		printf(" ....mount_prefix:%s, mount_point:%s, read_only:%d\r\n",
+		    mount_point->mount_prefix, mount_point->mount_point, mount_point->read_only);
+        */
+        
 		k = lxc_array_len((void **)h->all_mount_points);
 		r = lxc_grow_array((void ***)&h->all_mount_points, &h->all_mount_point_capacity, k + 1, 4);
 		if (r < 0)
@@ -582,7 +642,8 @@ static struct cgroup_meta_data *lxc_cgroup_load_meta2(const char **subsystem_whi
 		return NULL;
 	meta_data->ref = 1;
 
-	if (!find_cgroup_subsystems(&kernel_subsystems))
+    //解析/proc/cgroups中的内容到kernel_subsystems数组
+	if (!find_cgroup_subsystems(&kernel_subsystems)) 
 		goto out_error;
 
 	if (!find_cgroup_hierarchies(meta_data, all_kernel_subsystems,
@@ -656,7 +717,8 @@ static struct cgroup_mount_point *lxc_cgroup_find_mount_point(struct cgroup_hier
 	struct cgroup_mount_point *current_result = NULL;
 	ssize_t quality = -1;
 
-	/* trivial case */
+    printf("yang test .............. %p, %p\r\n", hierarchy->rw_absolute_mount_point, hierarchy->ro_absolute_mount_point);
+	/* trivial case */  //mount点不是/的直接返回
 	if (mountpoint_is_accessible(hierarchy->rw_absolute_mount_point))
 		return hierarchy->rw_absolute_mount_point;
 	if (!should_be_writable && mountpoint_is_accessible(hierarchy->ro_absolute_mount_point))
@@ -666,7 +728,7 @@ static struct cgroup_mount_point *lxc_cgroup_find_mount_point(struct cgroup_hier
 		struct cgroup_mount_point *mp = *mps;
 		size_t prefix_len = mp->mount_prefix ? strlen(mp->mount_prefix) : 0;
 
-		if (prefix_len == 1 && mp->mount_prefix[0] == '/')
+		if (prefix_len == 1 && mp->mount_prefix[0] == '/') 
 			prefix_len = 0;
 
 		if (!mountpoint_is_accessible(mp))
@@ -734,11 +796,23 @@ static struct cgroup_process_info *lxc_cgroup_process_info_get(pid_t pid, struct
 	return lxc_cgroup_process_info_getx(pid_buf, meta);
 }
 
+//3个step分别为find_cgroup_subsystems(/proc/cgroups)   find_cgroup_hierarchies(/proc/self/cgroup)  find_hierarchy_mountpts(/proc/self/mountinfo)
+//注意和lxc_cgroupfs_create->lxc_cgroup_process_info_get_init的区别
 static struct cgroup_process_info *lxc_cgroup_process_info_get_init(struct cgroup_meta_data *meta)
 {
 	return lxc_cgroup_process_info_get(1, meta);
 }
 
+/*
+    子目录/proc/self本身就是当前运行进程ID的符号链接.
+
+　　用ls -ld查看/proc/self目录的符号链接,发现每次都不一样,说明我们每次用ls命令时的进程ID都是不同的.
+
+　　ls -ld /proc/self
+
+　　lrwxrwxrwx 1 root root 64 2010-10-10 06:25 /proc/self -> 30525
+
+*/ //获取当前运行的lxc进程的self信息
 static struct cgroup_process_info *lxc_cgroup_process_info_get_self(struct cgroup_meta_data *meta)
 {
 	struct cgroup_process_info *i;
@@ -840,7 +914,7 @@ static struct cgroup_process_info *lxc_cgroupfs_create(const char *name, const c
 		return NULL;
 	}
 
-	if (!strstr(path_pattern, "%n")) {
+	if (!strstr(path_pattern, "%n")) { //默认/lxc/%n
 		ERROR("Invalid cgroup path pattern: '%s'; contains no %%n for specifying container name", path_pattern);
 		errno = EINVAL;
 		return NULL;
@@ -848,7 +922,7 @@ static struct cgroup_process_info *lxc_cgroupfs_create(const char *name, const c
 
 	/* we will modify the result of this operation directly,
 	 * so we don't have to copy the data structure
-	 */
+	 */ //获取cgourp信息
 	base_info = (path_pattern[0] == '/') ?
 		lxc_cgroup_process_info_get_init(meta_data) :
 		lxc_cgroup_process_info_get_self(meta_data);
@@ -868,6 +942,8 @@ static struct cgroup_process_info *lxc_cgroupfs_create(const char *name, const c
 		h = info_ptr->hierarchy;
 		if (!h)
 			continue;
+
+	    //printf("  ...........%s\r\n", info_ptr->cgroup_path);   打印/
 		mp = lxc_cgroup_find_mount_point(h, info_ptr->cgroup_path, true);
 		if (!mp) {
 			ERROR("Could not find writable mount point for cgroup hierarchy %d while trying to create cgroup.", h->index);
@@ -875,8 +951,16 @@ static struct cgroup_process_info *lxc_cgroupfs_create(const char *name, const c
 		}
 		info_ptr->designated_mount_point = mp;
 
-		if (lxc_string_in_array("ns", (const char **)h->subsystems))
+        /*
+        .....haystatc:cpuacct    cgroup文件中的字系统名
+        const char **haystack = (const char **)h->subsystems;
+        for (; haystack && *haystack; haystack++)
+            printf(".....haystatc:%s\r\n", (char*)*haystack);
+        */
+        
+		if (lxc_string_in_array("ns", (const char **)h->subsystems)) //如ns子系统直接返回
 			continue;
+			
 		if (handle_cgroup_settings(mp, info_ptr->cgroup_path) < 0) {
 			ERROR("Could not set clone_children to 1 for cpuset hierarchy in parent cgroup.");
 			goto out_initial_error;
@@ -888,6 +972,7 @@ static struct cgroup_process_info *lxc_cgroupfs_create(const char *name, const c
 	if (!cgroup_path_components)
 		goto out_initial_error;
 
+    // printf(" .......... %s.... %s\r\n", *cgroup_path_components, path_pattern); //lxc.... /lxc/%n
 	/* go through the path components to see if we can create them */
 	for (p = cgroup_path_components; *p || (sub_pattern && !had_sub_pattern); p++) {
 		/* we only want to create the same component with -1, -2, etc.
@@ -1075,6 +1160,7 @@ static struct cgroup_process_info *lxc_cgroupfs_create(const char *name, const c
 	return base_info;
 
 out_initial_error:
+    printf("------------------------out_initial_error\r\n");
 	saved_errno = errno;
 	free(path_so_far);
 	lxc_cgroup_process_info_free_and_remove(base_info);
@@ -1635,6 +1721,22 @@ static int cgfs_nrtasks(void *hdata)
 	return ret;
 }
 
+
+/*
+[root@localhost 1]# cat /proc/1/cgroup 
+11:pids:/
+10:freezer:/
+9:hugetlb:/
+8:blkio:/
+7:cpuset:/
+6:memory:/
+5:cpuacct,cpu:/
+4:perf_event:/
+3:devices:/
+2:net_prio,net_cls:/
+1:name=systemd:/
+*/
+//proc_pid_cgroup_str代表proc目录下面的cgroup文件
 static struct cgroup_process_info *
 lxc_cgroup_process_info_getx(const char *proc_pid_cgroup_str,
 			     struct cgroup_meta_data *meta)
@@ -1644,7 +1746,7 @@ lxc_cgroup_process_info_getx(const char *proc_pid_cgroup_str,
 	char *line = NULL;
 	size_t sz = 0;
 	int saved_errno = 0;
-	struct cgroup_process_info **cptr = &result;
+	struct cgroup_process_info **cptr = &result; //实现entry瓜姐到result上面
 	struct cgroup_process_info *entry = NULL;
 
 	proc_pid_cgroup = fopen_cloexec(proc_pid_cgroup_str, "r");
@@ -1656,7 +1758,7 @@ lxc_cgroup_process_info_getx(const char *proc_pid_cgroup_str,
 		char *colon1;
 		char *colon2;
 		char *endptr;
-		int hierarchy_number;
+		int hierarchy_number;//获取每行开始的数字
 		struct cgroup_hierarchy *h = NULL;
 
 		if (!line[0])
@@ -1683,11 +1785,21 @@ lxc_cgroup_process_info_getx(const char *proc_pid_cgroup_str,
 		if (!strcmp(colon1, ""))
 			continue;
 
-		hierarchy_number = strtoul(line, &endptr, 10);
+		hierarchy_number = strtoul(line, &endptr, 10); //获取每行开始的数字
 		if (!endptr || *endptr)
 			continue;
 
-		if (hierarchy_number > meta->maximum_hierarchy) {
+        /*
+         ..... 11,  11, pids, /
+         ..... 10,  11, freezer, /
+         ..... 9,  11, hugetlb, /
+         ..... 8,  11, blkio, /
+         ..... 7,  11, cpuset, /
+         ..... 6,  11, memory, /
+        ............
+        printf(" ..... %d,  %d, %s, %s\r\n", hierarchy_number, meta->maximum_hierarchy, colon1,colon2);  //0-11
+		*/
+		if (hierarchy_number > meta->maximum_hierarchy) { //0 - 11
 			/* we encountered a hierarchy we didn't have before,
 			 * so probably somebody remounted some stuff in the
 			 * mean time...
@@ -1721,7 +1833,9 @@ lxc_cgroup_process_info_getx(const char *proc_pid_cgroup_str,
 			goto out_error;
 		prune_init_scope(entry->cgroup_path);
 
-		*cptr = entry;
+
+        //这里把entry挂接到result上面
+		*cptr = entry; 
 		cptr = &entry->next;
 		entry = NULL;
 	}
@@ -1844,6 +1958,7 @@ static int create_or_remove_cgroup(bool do_remove,
 	return r;
 }
 
+//来创建cgroup的目录层级。 读取/proc/1/cgroup下去创建相应的cgroup层级，最后创建cgroup的目录。
 static int create_cgroup(struct cgroup_mount_point *mp, const char *path)
 {
 	return create_or_remove_cgroup(false, mp, path, false);
@@ -2161,7 +2276,8 @@ static int handle_cgroup_settings(struct cgroup_mount_point *mp,
 	 * and cpuset.cpus and then
 	 */
 	if (lxc_string_in_array("cpuset", (const char **)mp->hierarchy->subsystems)) {
-		char *cc_path = cgroup_to_absolute_path(mp, cgroup_path, "/cgroup.clone_children");
+	//cgroup.clone_children cpuset的subsystem会读取这个配置文件，如果这个的值是1(默认是0)，子cgroup才会继承父cgroup的cpuset的配置。
+		char *cc_path = cgroup_to_absolute_path(mp, cgroup_path, "/cgroup.clone_children");//cgroup.clone_children cpuset的subsystem会读取这个配置文件，如果这个的值是1(默认是0)，子cgroup才会继承父cgroup的cpuset的配置。
 		struct stat sb;
 
 		if (!cc_path)
@@ -2329,7 +2445,8 @@ static void *cgfs_init(const char *name)
 		goto err1;
 
 	d->cgroup_pattern = lxc_global_config_value("lxc.cgroup.pattern");
-
+    //printf("yang test ...d->cgroup_pattern:%s,  eid:%d\r\n", d->cgroup_pattern, geteuid()); ///lxc/%n,  eid:0
+    
 	d->meta = lxc_cgroup_load_meta();
 	if (!d->meta) {
 		ERROR("cgroupfs failed to detect cgroup metadata");
@@ -2359,6 +2476,7 @@ static void cgfs_destroy(void *hdata)
 	free(d);
 }
 
+//cgroup_create中执行
 static inline bool cgfs_create(void *hdata)
 {
 	struct cgfs_data *d = hdata;
@@ -2368,6 +2486,7 @@ static inline bool cgfs_create(void *hdata)
 	if (!d)
 		return false;
 	md = d->meta;
+	//printf("  .......... pattern:%s\r\n", d->cgroup_pattern);  pattern:/lxc/%n
 	i = lxc_cgroupfs_create(d->name, d->cgroup_pattern, md, NULL);
 	if (!i)
 		return false;

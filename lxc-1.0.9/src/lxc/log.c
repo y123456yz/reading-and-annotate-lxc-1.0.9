@@ -351,7 +351,6 @@ extern int lxc_log_init(const char *name, const char *file,
 			return 0;
 		ret = __lxc_log_set_file(file, 1);
 	} else {
-
 		/* For now, unprivileged containers have to set -l to get logging */
 		if (geteuid())
 			return 0;
@@ -363,7 +362,7 @@ extern int lxc_log_init(const char *name, const char *file,
 		ret = -1;
 
 		if (!lxcpath)
-			lxcpath = LOGPATH;
+			lxcpath = LOGPATH; //默认/usr/local/var/log/lxc   默认值见 src/python-lxc/Makefile
 
 		/* try LOGPATH if lxcpath is the default for the privileged containers */
 		if (!geteuid() && strcmp(LXCPATH, lxcpath) == 0)

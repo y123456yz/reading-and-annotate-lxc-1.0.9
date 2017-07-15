@@ -99,7 +99,7 @@ struct lxc_log_appender {
 /* log category object */
 struct lxc_log_category {
 	const char			*name;
-	int				priority;
+	int				priority;  //日志级别
 	struct lxc_log_appender		*appender;
 	const struct lxc_log_category	*parent;
 };

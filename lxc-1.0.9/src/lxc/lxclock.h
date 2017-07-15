@@ -38,7 +38,7 @@
  * LXC Lock
 */
 struct lxc_lock {
-	short type; //!< Lock type
+	short type; //!< Lock type  //ËøÀàÐÍ£¬ÈçLXC_LOCK_FLOCK
 
 	union {
 		sem_t *sem; //!< Anonymous semaphore (LXC_LOCK_ANON_SEM)

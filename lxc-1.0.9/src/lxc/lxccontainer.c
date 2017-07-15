@@ -110,7 +110,7 @@ static bool config_file_exists(const char *lxcpath, const char *cname)
  * and keeping an advisory lock.  When container creation completes,
  * we remove that file.  When we load or try to start a container, if
  * we find that file, without a flock, we remove the container.
- */
+ */ //判断容器是否正在被创建，通过partial锁来实现，已经存在文件锁说明容器已经被创建
 static int ongoing_create(struct lxc_container *c)
 {
 	int len = strlen(c->config_path) + strlen(c->name) + 10;
@@ -118,7 +118,7 @@ static int ongoing_create(struct lxc_container *c)
 	int fd, ret;
 	struct flock lk;
 
-	ret = snprintf(path, len, "%s/%s/partial", c->config_path, c->name);
+	ret = snprintf(path, len, "%s/%s/partial", c->config_path, c->name); //每个容器一个文件锁
 	if (ret < 0 || ret >= len) {
 		ERROR("Error writing partial pathname");
 		return -1;
@@ -427,6 +427,7 @@ static bool lxcapi_load_config(struct lxc_container *c, const char *alt_file)
 		fname = alt_file;
 	if (!fname)
 		return false;
+
 	/*
 	 * If we're reading something other than the container's config,
 	 * we only need to lock the in-memory container.  If loading the
@@ -441,6 +442,7 @@ static bool lxcapi_load_config(struct lxc_container *c, const char *alt_file)
 		lret = container_mem_lock(c);
 	if (lret)
 		return false;
+
 
 	ret = load_config_locked(c, fname);
 
@@ -561,6 +563,7 @@ static bool lxcapi_start(struct lxc_container *c, int useinit, char * const argv
 	if (!c->lxc_conf)
 		return false;
 
+    //判断容器是否正在被创建，通过partial锁来实现，已经存在文件锁说明容器已经被创建
 	if ((ret = ongoing_create(c)) < 0) {
 		ERROR("Error checking for incomplete creation");
 		return false;
@@ -668,6 +671,7 @@ static bool lxcapi_start(struct lxc_container *c, int useinit, char * const argv
 	conf->reboot = 0;
 
 reboot:
+
 	ret = lxc_start(c->name, argv, conf, c->config_path);
 	c->error_num = ret;
 
@@ -2109,7 +2113,7 @@ static const char *lxcapi_get_config_path(struct lxc_container *c)
  * Just recalculate the c->configfile based on the
  * c->config_path, which must be set.
  * The lxc_container must be locked or not yet public.
- */
+ */ //configpath+lxcname+config目录
 static bool set_config_filename(struct lxc_container *c)
 {
 	char *newpath;
@@ -3304,6 +3308,7 @@ static int lxcapi_attach_run_waitl(struct lxc_container *c, lxc_attach_options_t
 	return ret;
 }
 
+//configpath   -c指定的配置文件
 struct lxc_container *lxc_container_new(const char *name, const char *configpath)
 {
 	struct lxc_container *c;
@@ -3325,6 +3330,7 @@ struct lxc_container *lxc_container_new(const char *name, const char *configpath
 		goto err;
 	}
 
+     
 	remove_trailing_slashes(c->config_path);
 	c->name = malloc(strlen(name)+1);
 	if (!c->name) {
@@ -3349,10 +3355,11 @@ struct lxc_container *lxc_container_new(const char *name, const char *configpath
 		goto err;
 	}
 
+    //如果/usr/local/var/lib/lxc/config存在，则解析该配置文件
 	if (file_exists(c->configfile) && !lxcapi_load_config(c, NULL))
 		goto err;
 
-	if (ongoing_create(c) == 2) {
+	if (ongoing_create(c) == 2) { //判断容器是否正在被创建，通过partial锁来实现
 		ERROR("Error: %s creation was not completed", c->name);
 		lxcapi_destroy(c);
 		lxcapi_clear_config(c);

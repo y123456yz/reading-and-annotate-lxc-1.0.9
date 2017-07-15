@@ -62,12 +62,12 @@ struct lxc_container {
 	 * \private
 	 * Name of container.
 	 */
-	char *name;
+	char *name; //容器名  -n参数指定
 
 	/*!
 	 * \private
 	 * Full path to configuration file.
-	 */
+	 */ //默认/usr/local/var/lib/lxc(configure的时候指定) +  /config    赋值见set_config_filename
 	char *configfile;
 
 	/*!
@@ -79,13 +79,13 @@ struct lxc_container {
 	/*!
 	 * \private
 	 * Container semaphore lock.
-	 */
-	struct lxc_lock *slock;
+	 */  //文件锁  /lxc/lock/$lxcpath/$lxcname
+	struct lxc_lock *slock; //赋值见lxc_container_new
 
 	/*!
 	 * \private
 	 * Container private lock.
-	 */
+	 */ //普通信号量锁
 	struct lxc_lock *privlock;
 
 	/*!
@@ -100,8 +100,8 @@ struct lxc_container {
 	 * Container configuration.
 	 *
 	 * \internal FIXME: do we want the whole lxc_handler?
-	 */
-	struct lxc_conf *lxc_conf;
+	 */ //赋值初始化见lxc_conf_init
+	struct lxc_conf *lxc_conf; //解析的配置信息全部存入这里面 见parse_line->lxc_getconfig  config
 
 	// public fields
 	/*! Human-readable string representing last error */
@@ -114,7 +114,58 @@ struct lxc_container {
 	bool daemonize;
 
 	/*! Full path to configuration file */
-	char *config_path;
+	char *config_path; //默认/usr/local/var/lib/lxc   configure的时候指定
+
+
+
+    /*
+	c->is_defined = lxcapi_is_defined;
+	c->state = lxcapi_state;
+	c->is_running = lxcapi_is_running;
+	c->freeze = lxcapi_freeze;
+	c->unfreeze = lxcapi_unfreeze;
+	c->console = lxcapi_console;
+	c->console_getfd = lxcapi_console_getfd;
+	c->init_pid = lxcapi_init_pid;
+	c->load_config = lxcapi_load_config;
+	c->want_daemonize = lxcapi_want_daemonize;
+	c->want_close_all_fds = lxcapi_want_close_all_fds;
+	c->start = lxcapi_start;
+	c->startl = lxcapi_startl;
+	c->stop = lxcapi_stop;
+	c->config_file_name = lxcapi_config_file_name;
+	c->wait = lxcapi_wait;
+	c->set_config_item = lxcapi_set_config_item;
+	c->destroy = lxcapi_destroy;
+	c->rename = lxcapi_rename;
+	c->save_config = lxcapi_save_config;
+	c->get_keys = lxcapi_get_keys;
+	c->create = lxcapi_create;
+	c->createl = lxcapi_createl;
+	c->shutdown = lxcapi_shutdown;
+	c->reboot = lxcapi_reboot;
+	c->clear_config = lxcapi_clear_config;
+	c->clear_config_item = lxcapi_clear_config_item;
+	c->get_config_item = lxcapi_get_config_item;
+	c->get_running_config_item = lxcapi_get_running_config_item;
+	c->get_cgroup_item = lxcapi_get_cgroup_item;
+	c->set_cgroup_item = lxcapi_set_cgroup_item;
+	c->get_config_path = lxcapi_get_config_path;
+	c->set_config_path = lxcapi_set_config_path;
+	c->clone = lxcapi_clone;
+	c->get_interfaces = lxcapi_get_interfaces;
+	c->get_ips = lxcapi_get_ips;
+	c->attach = lxcapi_attach;
+	c->attach_run_wait = lxcapi_attach_run_wait;
+	c->attach_run_waitl = lxcapi_attach_run_waitl;
+	c->snapshot = lxcapi_snapshot;
+	c->snapshot_list = lxcapi_snapshot_list;
+	c->snapshot_restore = lxcapi_snapshot_restore;
+	c->snapshot_destroy = lxcapi_snapshot_destroy;
+	c->may_control = lxcapi_may_control;
+	c->add_device_node = lxcapi_add_device_node;
+	c->remove_device_node = lxcapi_remove_device_node;
+    */
 
 	/*!
 	 * \brief Determine if \c /var/lib/lxc/$name/config exists.
@@ -142,7 +193,7 @@ struct lxc_container {
 	 * \param c Container.
 	 *
 	 * \return \c true on success, else \c false.
-	 */
+	 */ //lxcapi_is_running 
 	bool (*is_running)(struct lxc_container *c);
 
 	/*!
@@ -181,7 +232,7 @@ struct lxc_container {
 	 *  \c NULL to use the default configuration file.
 	 *
 	 * \return \c true on success, else \c false.
-	 */
+	 */ //lxcapi_load_config  lxc_start.c中的main函数执行
 	bool (*load_config)(struct lxc_container *c, const char *alt_file);
 
 	/*!
@@ -192,7 +243,7 @@ struct lxc_container {
 	 * \param argv Array of arguments to pass to init.
 	 *
 	 * \return \c true on success, else \c false.
-	 */
+	 */ //lxcapi_start
 	bool (*start)(struct lxc_container *c, int useinit, char * const argv[]);
 
 	/*!
@@ -227,7 +278,7 @@ struct lxc_container {
 	 * \param state Value for the daemonize bit (0 or 1).
 	 *
 	 * \return \c true on success, else \c false.
-	 */
+	 */ //lxcapi_want_daemonize
 	bool (*want_daemonize)(struct lxc_container *c, bool state);
 
 	/*!
@@ -238,7 +289,7 @@ struct lxc_container {
 	 * \param state Value for the close_all_fds bit (0 or 1).
 	 *
 	 * \return \c true on success, else \c false.
-	 */
+	 */ //lxcapi_want_close_all_fds
 	bool (*want_close_all_fds)(struct lxc_container *c, bool state);
 
 	/*!
@@ -376,7 +427,7 @@ struct lxc_container {
 	 * \brief Completely clear the containers in-memory configuration.
 	 *
 	 * \param c Container.
-	 */
+	 */ //lxcapi_clear_config
 	void (*clear_config)(struct lxc_container *c);
 
 	/*!

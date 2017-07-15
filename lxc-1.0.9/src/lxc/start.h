@@ -34,6 +34,14 @@ struct lxc_conf;
 
 struct lxc_handler;
 
+/*
+例如start.c中的
+static struct lxc_operations start_ops = {
+	.start = start,
+	.post_start = post_start
+};
+
+*/
 struct lxc_operations {
 	int (*start)(struct lxc_handler *, void *);
 	int (*post_start)(struct lxc_handler *, void *);
@@ -58,20 +66,21 @@ struct ns_info {
 
 extern const struct ns_info ns_info[LXC_NS_MAX];
 
+//初始化赋值见lxc_init
 struct lxc_handler {
 	pid_t pid;
-	char *name;
-	lxc_state_t state;
-	int clone_flags;
+	char *name; //容器名
+	lxc_state_t state; //STARTING 等
+	int clone_flags; //CLONE_NEWUTS等，或
 	int sigfd;
 	sigset_t oldmask;
 	struct lxc_conf *conf;
 	struct lxc_operations *ops;
 	void *data;
-	int sv[2];
+	int sv[2]; //初始化见lxc_sync_init
 	int pinfd;
-	const char *lxcpath;
-	void *cgroup_data;
+	const char *lxcpath; //config_path 赋值见lxc_init
+	void *cgroup_data; //赋值见cgroup_init  类型为cgfs_data
 	int nsfd[LXC_NS_MAX];
 };
 

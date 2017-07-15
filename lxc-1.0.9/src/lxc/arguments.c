@@ -159,6 +159,7 @@ See the %s man page for further information.\n\n",
 	exit(code);
 }
 
+//见lxc_arguments_parse
 static int lxc_arguments_lxcpath_add(struct lxc_arguments *args,
 				     const char *lxcpath)
 {
@@ -203,7 +204,7 @@ extern int lxc_arguments_parse(struct lxc_arguments *args,
 		case 'o':	args->log_file = optarg; break;
 		case 'l':	args->log_priority = optarg; break;
 		case 'q':	args->quiet = 1; break;
-		case 'P':
+		case 'P': //-q -P 这几个参数都会走到这里
 			remove_trailing_slashes(optarg);
 			ret = lxc_arguments_lxcpath_add(args, optarg);
 			if (ret < 0)
@@ -214,7 +215,7 @@ extern int lxc_arguments_parse(struct lxc_arguments *args,
 		case '?':	print_help(args, 1);
 		case 'h': 	print_help(args, 0);
 		default:
-			if (args->parser) {
+			if (args->parser) { //后面这几个参数都会走到这里面
 				ret = args->parser(args, c, optarg);
 				if (ret)
 					goto error;
@@ -229,7 +230,9 @@ extern int lxc_arguments_parse(struct lxc_arguments *args,
 	args->argc = argc - optind;
 
 	/* If no lxcpaths were given, use default */
-	if (!args->lxcpath_cnt) {
+	//printf("yang test .... %d  <%s, %d> \r\n", args->lxcpath_cnt, __FUNCTION__, __LINE__);
+	if (!args->lxcpath_cnt) { //有配置-P
+	    
 		ret = lxc_arguments_lxcpath_add(args, lxc_global_config_value("lxc.lxcpath"));
 		if (ret < 0)
 			return ret;

@@ -1044,6 +1044,7 @@ static int ip_addr_get(int family, int ifindex, void **res)
 	int recv_len = 0, answer_len;
 	int readmore = 0;
 
+    //NETLINK_ROUTE用于获取和设置路由与链路信息
 	err = netlink_open(&nlh, NETLINK_ROUTE);
 	if (err)
 		return err;
@@ -1283,7 +1284,7 @@ int lxc_ipv6_dest_add(int ifindex, struct in6_addr *dest)
 /*
  * There is a lxc_bridge_attach, but no need of a bridge detach
  * as automatically done by kernel when a netdev is deleted.
- */
+ */ //把ifname网卡attach到网桥虚拟网卡
 int lxc_bridge_attach(const char *bridge, const char *ifname)
 {
 	int fd, index, err;
@@ -1311,6 +1312,7 @@ int lxc_bridge_attach(const char *bridge, const char *ifname)
 	return err;
 }
 
+//对应的网卡处理见netdev_conf    netdev_conf和lxc_network_types对应
 static const char* const lxc_network_types[LXC_NET_MAXCONFTYPE + 1] = {
 	[LXC_NET_EMPTY]   = "empty",
 	[LXC_NET_VETH]    = "veth",
@@ -1391,6 +1393,8 @@ char *lxc_mkifname(char *template)
 	return name;
 }
 
+
+//设置网卡MAC地址
 int setup_private_host_hw_addr(char *veth1)
 {
 	struct ifreq ifr;

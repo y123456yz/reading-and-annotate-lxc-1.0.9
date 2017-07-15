@@ -85,6 +85,7 @@ int lxc_monitor_fifo_name(const char *lxcpath, char *fifo_path, size_t fifo_path
 	return 0;
 }
 
+//创建$HOME + /lxc//usr/local/var/lib/lxc/monitor-fifo文件
 static void lxc_monitor_fifo_send(struct lxc_msg *msg, const char *lxcpath)
 {
 	int fd,ret;
@@ -96,6 +97,7 @@ static void lxc_monitor_fifo_send(struct lxc_msg *msg, const char *lxcpath)
 	if (ret < 0)
 		return;
 
+    
 	/* open the fifo nonblock in case the monitor is dead, we don't want
 	 * the open to wait for a reader since it may never come.
 	 */

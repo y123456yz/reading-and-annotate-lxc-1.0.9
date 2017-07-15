@@ -341,3 +341,41 @@
       lxc-start 1500043290.956 WARN     lxc_conf - conf.c:lxc_delete_autodev:1590 - Failed to locate autodev /dev/.lxc and /dev/.lxc/user.
       lxc-start 1500043290.977 ERROR    lxc_start_ui - lxc_start.c:main:344 - The container failed to start.
       lxc-start 1500043290.977 ERROR    lxc_start_ui - lxc_start.c:main:348 - Additional information can be obtained by setting the --logfile and --logpriority options.
+      lxc-start 1500092117.710 WARN     lxc_log - log.c:lxc_log_init:331 - lxc_log_init called with log already initialized
+      lxc-start 1500092117.713 DEBUG    lxc_conf - conf.c:lxc_create_tty:3813 - allocated pty '/dev/pts/1' (5/6)
+      lxc-start 1500092117.714 DEBUG    lxc_conf - conf.c:lxc_create_tty:3813 - allocated pty '/dev/pts/2' (7/8)
+      lxc-start 1500092117.714 DEBUG    lxc_conf - conf.c:lxc_create_tty:3813 - allocated pty '/dev/pts/3' (9/10)
+      lxc-start 1500092117.714 DEBUG    lxc_conf - conf.c:lxc_create_tty:3813 - allocated pty '/dev/pts/4' (11/12)
+      lxc-start 1500092117.714 INFO     lxc_conf - conf.c:lxc_create_tty:3824 - tty's configured
+      lxc-start 1500092117.714 DEBUG    lxc_start - start.c:setup_signal_fd:264 - sigchild handler set
+      lxc-start 1500092117.714 DEBUG    console - console.c:lxc_console_peer_default:500 - opening /dev/tty for console peer
+      lxc-start 1500092117.714 DEBUG    console - console.c:lxc_console_peer_default:506 - using '/dev/tty' as console
+      lxc-start 1500092117.714 DEBUG    console - console.c:lxc_console_sigwinch_init:179 - 59069 got SIGWINCH fd 17
+      lxc-start 1500092117.714 DEBUG    console - console.c:lxc_console_winsz:88 - set winsz dstfd:14 cols:236 rows:67
+      lxc-start 1500092117.714 INFO     lxc_start - start.c:lxc_init:467 - 'yyz-test' is initialized
+      lxc-start 1500092117.716 DEBUG    lxc_start - start.c:__lxc_start:1147 - Not dropping cap_sys_boot or watching utmp
+      lxc-start 1500092117.776 DEBUG    lxc_conf - conf.c:instantiate_veth:3129 - instantiated veth 'vethD5TTYC/veth3JWBAM', index is '118'
+      lxc-start 1500092117.776 INFO     lxc_cgroup - cgroup.c:cgroup_init:62 - cgroup driver cgroupfs initing for yyz-test
+      lxc-start 1500092117.908 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2114 - cgroup 'devices.deny' set to 'a'
+      lxc-start 1500092117.908 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2114 - cgroup 'devices.allow' set to 'c *:* m'
+      lxc-start 1500092117.908 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2114 - cgroup 'devices.allow' set to 'b *:* m'
+      lxc-start 1500092117.909 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2114 - cgroup 'devices.allow' set to 'c 1:3 rwm'
+      lxc-start 1500092117.909 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2114 - cgroup 'devices.allow' set to 'c 1:5 rwm'
+      lxc-start 1500092117.909 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2114 - cgroup 'devices.allow' set to 'c 1:7 rwm'
+      lxc-start 1500092117.909 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2114 - cgroup 'devices.allow' set to 'c 5:0 rwm'
+      lxc-start 1500092117.909 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2114 - cgroup 'devices.allow' set to 'c 1:8 rwm'
+      lxc-start 1500092117.909 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2114 - cgroup 'devices.allow' set to 'c 1:9 rwm'
+      lxc-start 1500092117.909 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2114 - cgroup 'devices.allow' set to 'c 136:* rwm'
+      lxc-start 1500092117.909 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2114 - cgroup 'devices.allow' set to 'c 5:2 rwm'
+      lxc-start 1500092117.909 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2114 - cgroup 'devices.allow' set to 'c 10:229 rwm'
+      lxc-start 1500092117.909 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2114 - cgroup 'memory.limit_in_bytes' set to '512M'
+      lxc-start 1500092117.909 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2114 - cgroup 'cpuset.cpus' set to '0'
+      lxc-start 1500092117.909 INFO     lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2118 - cgroup has been setup
+      lxc-start 1500092117.920 DEBUG    lxc_conf - conf.c:lxc_assign_network:3565 - move '(null)' to '59075'
+      lxc-start 1500092117.921 ERROR    lxc_start - start.c:print_top_failing_dir:102 - No such file or directory - could not access /usr/local/var/lib.  Please grant it 'x' access, or add an ACL for the container root.
+      lxc-start 1500092117.930 ERROR    lxc_sync - sync.c:__sync_wait:57 - An error occurred in another process (expected sequence number 3)
+      lxc-start 1500092117.930 WARN     lxc_conf - conf.c:lxc_delete_network:3434 - failed to remove interface 118 '(null)'
+      lxc-start 1500092117.930 ERROR    lxc_start - start.c:__lxc_start:1169 - failed to spawn 'yyz-test'
+      lxc-start 1500092117.932 WARN     lxc_conf - conf.c:lxc_delete_autodev:1590 - Failed to locate autodev /dev/.lxc and /dev/.lxc/user.
+      lxc-start 1500092117.944 ERROR    lxc_start_ui - lxc_start.c:main:344 - The container failed to start.
+      lxc-start 1500092117.944 ERROR    lxc_start_ui - lxc_start.c:main:348 - Additional information can be obtained by setting the --logfile and --logpriority options.

@@ -40,21 +40,22 @@ struct lxc_arguments {
 	lxc_arguments_parser_t parser;
 	lxc_arguments_checker_t checker;
 
-	const char *name;
-	char *log_file;
-	char *log_priority;
+	const char *name; //容器名
+	char *log_file; //日志名
+	char *log_priority; //日志等级  赋值参考lxc_log_priority_to_int
 	int quiet;
-	int daemonize;
-	const char *rcfile;
+	int daemonize; //-d启用daemon
+	const char *rcfile; //配置文件
 	const char *console;
 	const char *console_log;
 	const char *pidfile;
+	//和-P参数有关
 	const char **lxcpath;
-	int lxcpath_cnt;
+	int lxcpath_cnt; //赋值见lxc_arguments_lxcpath_add
 	/* set to 0 to accept only 1 lxcpath, -1 for unlimited */
-	int lxcpath_additional;
+	int lxcpath_additional; //-P 0,只接受一个lxcpath
 
-	/* for lxc-start */
+	/* for lxc-start */ //里面值见LXC_NS_IPC等
 	const char *share_ns[32]; // size must be greater than LXC_NS_MAX
 
 	/* for lxc-console */
@@ -94,7 +95,7 @@ struct lxc_arguments {
 	char *groups;
 
 	/* remaining arguments */
-	char *const *argv;
+	char *const *argv; //存放命令行参数信息
 	int argc;
 
 	/* private arguments */
