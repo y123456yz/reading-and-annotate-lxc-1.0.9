@@ -49,6 +49,7 @@ extern char *get_rundir(void);
 
 /* Define setns() if missing from the C library */
 #ifndef HAVE_SETNS
+//setns()关联一个命名空间
 static inline int setns(int fd, int nstype)
 {
 #ifdef __NR_setns

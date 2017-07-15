@@ -123,6 +123,7 @@ static void close_ns(int ns_fd[LXC_NS_MAX]) {
  * Return true on success, false on failure.  On failure, leave an error
  * message in *errmsg, which caller must free.
  */
+ //获取进程pid下面的ns目录相关文件句柄fd,存入ns_fd
 static
 bool preserve_ns(int ns_fd[LXC_NS_MAX], int clone_flags, pid_t pid, char **errmsg) {
 	int i, ret;
@@ -143,6 +144,16 @@ bool preserve_ns(int ns_fd[LXC_NS_MAX], int clone_flags, pid_t pid, char **errms
 			continue;
 		snprintf(path, MAXPATHLEN, "/proc/%d/ns/%s", pid,
 		         ns_info[i].proc_name);
+
+        /*
+         ................... ns_fd:/proc/63418/ns/mnt
+         ................... ns_fd:/proc/63418/ns/pid
+         ................... ns_fd:/proc/63418/ns/uts
+         ................... ns_fd:/proc/63418/ns/ipc
+         ................... ns_fd:/proc/63418/ns/net
+         printf("yang test ................... ns_fd:%s\r\n", path);
+        */
+		
 		ns_fd[i] = open(path, O_RDONLY | O_CLOEXEC);
 		if (ns_fd[i] < 0)
 			goto error;
@@ -915,7 +926,7 @@ static int lxc_spawn(struct lxc_handler *handler)
 		INFO("Inheriting a UTS namespace");
 	}
 
-
+    //读取/sys/self/
 	if (!cgroup_init(handler)) {
 		ERROR("failed initializing cgroup support");
 		goto out_delete_net;
@@ -923,6 +934,8 @@ static int lxc_spawn(struct lxc_handler *handler)
 
 	cgroups_connected = true;
 
+    
+    //创建/sys/fs/cgroup/cpuacct/lxc/  /sys/fs/cgroup/cpuacct/lxc/yyz-test 及其他cgroup mount挂载点下面的lxc  lxc/yyz-test目录
 	if (!cgroup_create(handler)) {
 		ERROR("failed creating cgroups");
 		goto out_delete_net;
@@ -931,7 +944,7 @@ static int lxc_spawn(struct lxc_handler *handler)
 	/*
 	 * if the rootfs is not a blockdev, prevent the container from
 	 * marking it readonly.
-	 *
+	 * 如果文件系统不是一个blockdev，防止容器标记它只读
 	 * if the container is unprivileged then skip rootfs pinning
 	 */
 	if (lxc_list_empty(&handler->conf->id_map)) {
@@ -940,14 +953,17 @@ static int lxc_spawn(struct lxc_handler *handler)
 			INFO("failed to pin the container's rootfs");
 	}
 
-	if (!preserve_ns(saved_ns_fd, preserve_mask, getpid(), &errmsg)) {
+	if (!preserve_ns(saved_ns_fd, preserve_mask, getpid(), &errmsg)) { //获取当前进程的namespace中各个文件的fd句柄
 		SYSERROR("Failed to preserve requested namespaces: %s",
 			errmsg ? errmsg : "(Out of memory)");
 		free(errmsg);
 		goto out_delete_net;
 	}
-	if (attach_ns(handler->conf->inherit_ns_fd) < 0)
+
+	
+	if (attach_ns(handler->conf->inherit_ns_fd) < 0)  
 		goto out_delete_net;
+
 
 	if (am_unpriv() && (nveths = count_veths(&handler->conf->network))) {
 		if (pipe(netpipepair) < 0) {
@@ -962,6 +978,8 @@ static int lxc_spawn(struct lxc_handler *handler)
 	flags = handler->clone_flags;
 	if (handler->clone_flags & CLONE_NEWUSER)
 		flags &= ~CLONE_NEWNET;
+
+    printf("yang test ......%X\r\n", handler->clone_flags);
 	handler->pid = lxc_clone(do_start, handler, handler->clone_flags);
 	if (handler->pid < 0) {
 		SYSERROR("failed to fork into a new namespace");
@@ -974,10 +992,10 @@ static int lxc_spawn(struct lxc_handler *handler)
 		free(errmsg);
 	}
 
-	if (attach_ns(saved_ns_fd))
+	if (attach_ns(saved_ns_fd)) //attach各种命名空间
 		WARN("failed to restore saved namespaces");
 
-    //关闭子进程的fd[0]
+     
 	lxc_sync_fini_child(handler);
 
 	/* map the container uids - the container became an invalid

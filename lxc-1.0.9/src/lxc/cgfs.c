@@ -77,7 +77,7 @@ struct cgroup_meta_data { //初始化使用见cgfs_init
 struct cgroup_hierarchy { //cgroup_meta_data.hierarchies成员
 	int index; ///proc/self/cgroup中每行的子系统编号
 	bool used; /* false if the hierarchy should be ignored by lxc */
-	char **subsystems; //例如2:net_prio,net_cls:/中的net_prio,net_cls
+	char **subsystems; //例如2:net_prio,net_cls:/中的net_prio,net_cls  子系统列表信息 net_prio,net_cls会被拆分成net_prio net_cls占用两个数组位
 
 
     //需要保证mount的挂载点必须在/proc/cgroups中存在
@@ -95,13 +95,15 @@ struct cgroup_hierarchy { //cgroup_meta_data.hierarchies成员
  * cgroup_mount_point: a mount point to where a hierarchy
  *                     is mounted to
  */
+ //cgroup_process_info.designated_mount_point
 struct cgroup_mount_point {//参考find_hierarchy_mountpts
 	struct cgroup_hierarchy *hierarchy;
 	//cgroup on /sys/fs/cgroup/devices type cgroup (rw,nosuid,nodev,noexec,relatime,devices)中的/sys/fs/cgroup/devices
 	char *mount_point;//挂载点
 	char *mount_prefix; //lxcfs默认为/     赋值见find_hierarchy_mountpts
 	bool read_only; //是否只读
-	bool need_cpuset_init;
+	//如果是linux内核版本比较老，则需要我们代码自己初始化，生效见handle_cgroup_settings  init_cpuset_if_needed
+	bool need_cpuset_init; //是否INIT
 };
 
 /*
@@ -112,17 +114,18 @@ struct cgroup_mount_point {//参考find_hierarchy_mountpts
  * Note this is the per-process info tracked by the cgfs_ops.
  * This is not used with cgmanager.
  */
-struct cgroup_process_info {
+struct cgroup_process_info { 
 	struct cgroup_process_info *next; //cgroup_process_info通过next链接到一起，可以参考cgroup_process_info
 	struct cgroup_meta_data *meta_ref;
 	struct cgroup_hierarchy *hierarchy; //cgourp文件每行的最前面的数字  如11:pids:/ 中的11
-	char *cgroup_path; //cgourp中的例如11:pids:/ 中的/
+	char *cgroup_path; //cgourp中的例如11:pids:/ 中的/    创建/sys/fs/cgroup/lxc/xxx等相关目录后，会重新赋值为/lxc/yyz-test
 	char *cgroup_path_sub;
-	char **created_paths;
+	//lxc_cgroupfs_create 或者 lxc_cgroup_create_legacy 中赋值
+	char **created_paths; //创建的文件路径，例如/sys/fs/cgroup/pids/lxc   /sys/fs/cgroup/pids/lxc/yyz-test 等都存入该数组
 	size_t created_paths_capacity;
 	size_t created_paths_count;
-	//使用见lxc_cgroupfs_create
-	struct cgroup_mount_point *designated_mount_point;
+	//使用见lxc_cgroupfs_create   这里面一般是mount的cgroup文件系统挂载点
+	struct cgroup_mount_point *designated_mount_point; //例如/sys/fs/cgroup/blkio  /sys/fs/cgroup/cpu,cpuacct等
 };
 
 struct cgfs_data { //初始化见cgfs_init
@@ -462,7 +465,7 @@ out:
 /* Step 3: determine all mount points of each hierarchy */
 
 //3个step分别为find_cgroup_subsystems(/proc/cgroups)   find_cgroup_hierarchies(/proc/self/cgroup)  find_hierarchy_mountpts(/proc/self/mountinfo)
-//kernel_subsystems是从proc/cgroups获取的内容
+//kernel_subsystems是从proc/cgroups获取的内容  //需要保证mount的挂载点必须在/proc/cgroups中存在
 static bool find_hierarchy_mountpts( struct cgroup_meta_data *meta_data, char **kernel_subsystems) 
 {
 	bool bret = false;
@@ -717,7 +720,6 @@ static struct cgroup_mount_point *lxc_cgroup_find_mount_point(struct cgroup_hier
 	struct cgroup_mount_point *current_result = NULL;
 	ssize_t quality = -1;
 
-    printf("yang test .............. %p, %p\r\n", hierarchy->rw_absolute_mount_point, hierarchy->ro_absolute_mount_point);
 	/* trivial case */  //mount点不是/的直接返回
 	if (mountpoint_is_accessible(hierarchy->rw_absolute_mount_point))
 		return hierarchy->rw_absolute_mount_point;
@@ -891,11 +893,13 @@ static char *cgroup_rename_nsgroup(const char *mountpath, const char *oldname, p
 }
 
 /* create a new cgroup */
+
+//创建/sys/fs/cgroup/cpuacct/lxc/  /sys/fs/cgroup/cpuacct/lxc/yyz-test 及其他cgroup mount挂载点下面的lxc  lxc/yyz-test目录
 static struct cgroup_process_info *lxc_cgroupfs_create(const char *name, const char *path_pattern, struct cgroup_meta_data *meta_data, const char *sub_pattern)
 {
 	char **cgroup_path_components = NULL;
 	char **p = NULL;
-	char *path_so_far = NULL;
+	char *path_so_far = NULL; 
 	char **new_cgroup_paths = NULL;
 	char **new_cgroup_paths_sub = NULL;
 	struct cgroup_mount_point *mp;
@@ -967,20 +971,23 @@ static struct cgroup_process_info *lxc_cgroupfs_create(const char *name, const c
 		}
 	}
 
-	/* normalize the path */
+	/* normalize the path */ //例如把/lxc/%n按照/拆分成lxc 和%n 存入cgroup_path_components数组，数组中就有了两个成员，一个lxc 一个%n
 	cgroup_path_components = lxc_normalize_path(path_pattern);
 	if (!cgroup_path_components)
 		goto out_initial_error;
 
-    // printf(" .......... %s.... %s\r\n", *cgroup_path_components, path_pattern); //lxc.... /lxc/%n
+    //printf(" .......... %s.... %s\r\n", *cgroup_path_components, path_pattern); //lxc.... /lxc/%n
 	/* go through the path components to see if we can create them */
-	for (p = cgroup_path_components; *p || (sub_pattern && !had_sub_pattern); p++) {
+	//该循环就是在cgroup挂载点上面创建/lxc  lxc/yyz_test目录
+	for (p = cgroup_path_components; *p || (sub_pattern && !had_sub_pattern); p++) { 
+	
 		/* we only want to create the same component with -1, -2, etc.
 		 * if the component contains the container name itself, otherwise
 		 * it's not an error if it already exists
 		 */
 		char *p_eff = *p ? *p : (char *)sub_pattern;
-		bool contains_name = strstr(p_eff, "%n");
+		//p_eff是否%n，例如path_pattern为 /lxc/%n，则cgroup_path_components数组的第二个成员就是%n，和这里匹配
+		bool contains_name = strstr(p_eff, "%n"); 
 		char *current_component = NULL;
 		char *current_subpath = NULL;
 		char *current_entire_path = NULL;
@@ -999,6 +1006,7 @@ static struct cgroup_process_info *lxc_cgroupfs_create(const char *name, const c
 		goto find_name_on_this_level;
 
 	cleanup_name_on_this_level:
+	    printf("yang test .........cleanup_name_on_this_level\r\n");
 		/* This is reached if we found a name clash.
 		 * In that case, remove the cgroup from all previous hierarchies
 		 */
@@ -1027,13 +1035,26 @@ static struct cgroup_process_info *lxc_cgroupfs_create(const char *name, const c
 			current_component = lxc_string_replace("%n", buf, p_eff);
 			free(buf);
 		} else {
+		    //如果是%n则用容器名替代
 			current_component = contains_name ? lxc_string_replace("%n", name, p_eff) : p_eff;
+			/*
+			..................lxc  lxc
+            ..................%n  yyz-test
+			printf("..................%s  %s\r\n", p_eff, current_component);
+			*/
 		}
-		parts[0] = path_so_far;
-		parts[1] = current_component;
+		parts[0] = path_so_far; //记录上一次的current_subpath
+		parts[1] = current_component; //本次的current_component
 		parts[2] = NULL;
 		current_subpath = path_so_far ? lxc_string_join("/", (const char **)parts, false) : current_component;
 
+        /* /lxc/%n  被拆分成lxc  %n两个成员，其中%n前面被替换为容器名
+		.........(null)  lxc  (null)  lxc
+        ..lxc  yyz-test  (null)  lxc/yyz-test
+		printf(".........%s  %s  %s  %s\r\n", parts[0], parts[1], parts[2], current_subpath);
+		*/
+		
+		
 		/* Now go through each hierarchy and try to create the
 		 * corresponding cgroup
 		 */
@@ -1043,6 +1064,13 @@ static struct cgroup_process_info *lxc_cgroupfs_create(const char *name, const c
 			if (!info_ptr->hierarchy)
 				continue;
 
+            /*.....haystatc:pids
+            .....haystatc:freezer
+            .....
+            const char **haystack = (const char **)info_ptr->hierarchy->subsystems;
+            for (; haystack && *haystack; haystack++)
+                printf(".....haystatc:%s\r\n", (char*)*haystack);
+            */
 			if (lxc_string_in_array("ns", (const char **)info_ptr->hierarchy->subsystems))
 				continue;
 			current_entire_path = NULL;
@@ -1051,7 +1079,15 @@ static struct cgroup_process_info *lxc_cgroupfs_create(const char *name, const c
 			parts2[1] = current_subpath;
 			parts2[2] = NULL;
 			current_entire_path = lxc_string_join("/", (const char **)parts2, false);
-
+			
+			/*
+			.........1:  2:lxc  3:(null)  4:/lxc
+			..........
+            .........1:  2:lxc/yyz-test  3:(null)  4:/lxc/yyz-test
+            ..........
+            printf(".........1:%s  2:%s  3:%s  4:%s\r\n", parts2[0], parts2[1], parts2[2], current_entire_path);
+            */
+            
 			if (!*p) {
 				/* we are processing the subpath, so only update that one */
 				free(new_cgroup_paths_sub[i]);
@@ -1061,21 +1097,24 @@ static struct cgroup_process_info *lxc_cgroupfs_create(const char *name, const c
 			} else {
 				/* remember which path was used on this controller */
 				free(new_cgroup_paths[i]);
-				new_cgroup_paths[i] = strdup(current_entire_path);
+				new_cgroup_paths[i] = strdup(current_entire_path); //  /lxc   /lxc/yyz-test
 				if (!new_cgroup_paths[i])
 					goto cleanup_from_error;
 			}
 
 			r = create_cgroup(info_ptr->designated_mount_point, current_entire_path);
-			if (r < 0 && errno == EEXIST && contains_name) {
+			// /sys/fs/cgroup/pids/lxc 返回值  -1  17  0        pids还可能是cpu,cpuacct等
+			// /sys/fs/cgroup/pids/lxc/yyz-test 返回值  0  17  1
+			//printf("yang test .........%s  %d  %d  %d\r\n", current_entire_path, r, errno, contains_name);
+			if (r < 0 && errno == EEXIST && contains_name) { //一般不会进入这里面
 				/* name clash => try new name with new suffix */
 				free(current_entire_path);
 				current_entire_path = NULL;
 				goto cleanup_name_on_this_level;
-			} else if (r < 0 && errno != EEXIST) {
+			} else if (r < 0 && errno != EEXIST) { //创建失败
 				SYSERROR("Could not create cgroup '%s' in '%s'.", current_entire_path, info_ptr->designated_mount_point->mount_point);
 				goto cleanup_from_error;
-			} else if (r == 0) {
+			} else if (r == 0) { //如果是第一次创建/sys/fs/cgroup/pids/lxc  或者多次创建/sys/fs/cgroup/pids/lxc/yyz-test则会进入这里
 				/* successfully created */
 				r = lxc_grow_array((void ***)&info_ptr->created_paths, &info_ptr->created_paths_capacity, info_ptr->created_paths_count + 1, 8);
 				if (r < 0)
@@ -1085,14 +1124,17 @@ static struct cgroup_process_info *lxc_cgroupfs_create(const char *name, const c
 					goto cleanup_from_error;
 				}
 				info_ptr->created_paths[info_ptr->created_paths_count++] = current_entire_path;
-			} else {
+			} else { //例如创建 /sys/fs/cgroup/pids/lxc  了能会走到这里面  比如第一次启动docker后，第二次在起来，这时候lxc目录以及有了
 				/* if we didn't create the cgroup, then we have to make sure that
 				 * further cgroups will be created properly
 				 */
+
 				if (handle_cgroup_settings(info_ptr->designated_mount_point, info_ptr->cgroup_path) < 0) {
 					ERROR("Could not set clone_children to 1 for cpuset hierarchy in pre-existing cgroup.");
 					goto cleanup_from_error;
 				}
+
+				//如果内核版本比较老，则需要手动init cpuset
 				if (!init_cpuset_if_needed(info_ptr->designated_mount_point, info_ptr->cgroup_path)) {
 					ERROR("Failed to initialize cpuset in pre-existing '%s'.", info_ptr->cgroup_path);
 					goto cleanup_from_error;
@@ -1147,8 +1189,11 @@ static struct cgroup_process_info *lxc_cgroupfs_create(const char *name, const c
 		if (lxc_string_in_array("ns", (const char **)info_ptr->hierarchy->subsystems))
 			continue;
 		free(info_ptr->cgroup_path);
+		
 		info_ptr->cgroup_path = new_cgroup_paths[i];
 		info_ptr->cgroup_path_sub = new_cgroup_paths_sub[i];
+		//yang test .......... /lxc/yyz-test  (null)
+		//printf("yang test .......... %s  %s\r\n", info_ptr->cgroup_path, info_ptr->cgroup_path_sub);
 	}
 	/* don't use lxc_free_array since we used the array members
 	 * to store them in our result...
@@ -1944,14 +1989,29 @@ static int create_or_remove_cgroup(bool do_remove,
 	if (!buf)
 		return -1;
 
+    /*  在cgroup挂载点上创建lxc  lxc/yyz-test等目录
+    ............... buf:/sys/fs/cgroup/pids/lxc
+    .....
+    ............... buf:/sys/fs/cgroup/cpu,cpuacct/lxc
+    ............... buf:/sys/fs/cgroup/perf_event/lxc
+    ............... buf:/sys/fs/cgroup/devices/lxc
+    ............... buf:/sys/fs/cgroup/net_cls,net_prio/lxc
+    ............... buf:/sys/fs/cgroup/pids/lxc/yyz-test
+    .....
+    ............... buf:/sys/fs/cgroup/cpu,cpuacct/lxc/yyz-test
+    ............... buf:/sys/fs/cgroup/perf_event/lxc/yyz-test
+    ............... buf:/sys/fs/cgroup/devices/lxc/yyz-test
+    ............... buf:/sys/fs/cgroup/net_cls,net_prio/lxc/yyz-test
+    printf("............... buf:%s\r\n", buf);
+    */
 	/* create or remove directory */
 	if (do_remove) {
 		if (recurse)
 			r = cgroup_rmdir(buf);
 		else
 			r = rmdir(buf);
-	} else
-		r = mkdir(buf, 0777);
+	} else 
+		r = mkdir(buf, 0777);  //如果文件存在，会返回-1，错误码为EEXIST
 	saved_errno = errno;
 	free(buf);
 	errno = saved_errno;
@@ -2247,19 +2307,25 @@ static int count_lines(const char *fn)
 	return n;
 }
 
+/*
+把xxx/memory//memory.use_hierarchy值1，XXX一般为挂载点/sys/fs/cgroup
+把xxx/cpuset//cgroup.clone_children值1，XXX一般为挂载点/sys/fs/cgroup
+*/
 static int handle_cgroup_settings(struct cgroup_mount_point *mp,
 				  char *cgroup_path)
 {
 	int r, saved_errno = 0;
 	char buf[2];
 
-	mp->need_cpuset_init = false;
+	mp->need_cpuset_init = false; //这里false，如果后面检测到stat失败，则说明内核版本较低，需要我们自己初始化
 
 	/* If this is the memory cgroup, we want to enforce hierarchy.
 	 * But don't fail if for some reason we can't.
 	 */
 	if (lxc_string_in_array("memory", (const char **)mp->hierarchy->subsystems)) {
+	    //如果mp指向的是cgroup的memory目录，则把xxx/memory//memory.use_hierarchy值1，XXX一般为挂载点/sys/fs/cgroup
 		char *cc_path = cgroup_to_absolute_path(mp, cgroup_path, "/memory.use_hierarchy");
+		//printf("yang test ..... .. cc_path:%s\r\n", cc_path);  cc_path:/sys/fs/cgroup/memory//memory.use_hierarchy
 		if (cc_path) {
 			r = lxc_read_from_file(cc_path, buf, 1);
 			if (r < 1 || buf[0] != '1') {
@@ -2275,6 +2341,7 @@ static int handle_cgroup_settings(struct cgroup_mount_point *mp,
 	 * the base cgroup, otherwise containers will start with an empty cpuset.mems
 	 * and cpuset.cpus and then
 	 */
+	 ///sys/fs/cgroup/cpuset//cgroup.clone_children 值1
 	if (lxc_string_in_array("cpuset", (const char **)mp->hierarchy->subsystems)) {
 	//cgroup.clone_children cpuset的subsystem会读取这个配置文件，如果这个的值是1(默认是0)，子cgroup才会继承父cgroup的cpuset的配置。
 		char *cc_path = cgroup_to_absolute_path(mp, cgroup_path, "/cgroup.clone_children");//cgroup.clone_children cpuset的subsystem会读取这个配置文件，如果这个的值是1(默认是0)，子cgroup才会继承父cgroup的cpuset的配置。
@@ -2287,7 +2354,7 @@ static int handle_cgroup_settings(struct cgroup_mount_point *mp,
 		 * cpuset.cpus and cpuset.mems later, after the new cgroup
 		 * was created
 		 */
-		if (stat(cc_path, &sb) != 0 && errno == ENOENT) {
+		if (stat(cc_path, &sb) != 0 && errno == ENOENT) { //如果是linux内核版本比较老，则需要我们代码自己初始化，生效见init_cpuset_if_needed
 			mp->need_cpuset_init = true;
 			free(cc_path);
 			return 0;
@@ -2392,7 +2459,7 @@ static bool init_cpuset_if_needed(struct cgroup_mount_point *mp,
 				 (const char **)mp->hierarchy->subsystems))
 		return true;
 
-	if (!mp->need_cpuset_init)
+	if (!mp->need_cpuset_init) //需要自己初始化，和handle_cgroup_settings配合阅读
 		return true;
 
 	return (do_init_cpuset_file(mp, path, "/cpuset.cpus") &&
@@ -2431,6 +2498,7 @@ struct cgroup_ops *cgfs_ops_init(void)
 	return &cgfs_ops;
 }
 
+//读取/proc/self/mountinfo和/proc/self/cgroup相关信息存入相应结构， //需要保证mount的挂载点必须在/proc/cgroups中存在
 static void *cgfs_init(const char *name)
 {
 	struct cgfs_data *d;
@@ -2476,7 +2544,8 @@ static void cgfs_destroy(void *hdata)
 	free(d);
 }
 
-//cgroup_create中执行
+//cgroup_create中执行 
+//创建/sys/fs/cgroup/cpuacct/lxc/  /sys/fs/cgroup/cpuacct/lxc/yyz-test 及其他cgroup mount挂载点下面的lxc  lxc/yyz-test目录
 static inline bool cgfs_create(void *hdata)
 {
 	struct cgfs_data *d = hdata;

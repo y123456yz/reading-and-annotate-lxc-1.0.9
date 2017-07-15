@@ -203,6 +203,7 @@ Options :\n\
 	.pidfile = NULL,
 };
 
+//Æô¶¯ ./src/lxc/lxc-start -n yyz-test -f lxc.conf_yyz  --logpriority=DEBUG -o yyz.log 
 int main(int argc, char *argv[])
 {
 	int err = 1;

@@ -28,26 +28,61 @@
 
 #include "config.h"
 
+/*
+Namespace    系统调用参数    隔离内容
+UTS         CLONE_NEWUTS    主机名与域名
+
+IPC
+
+CLONE_NEWIPC
+
+信号量、消息队列和共享内存
+
+PID
+
+CLONE_NEWPID
+
+进程编号
+
+Network
+
+CLONE_NEWNET
+
+网络设备、网络栈、端口等等
+
+Mount
+
+CLONE_NEWNS
+
+挂载点（文件系统）
+
+User
+
+CLONE_NEWUSER
+
+用户和用户组
+
+*/
 #ifndef CLONE_FS
 #  define CLONE_FS                0x00000200
 #endif
-#ifndef CLONE_NEWNS
-#  define CLONE_NEWNS             0x00020000
+#ifndef CLONE_NEWNS           
+#  define CLONE_NEWNS             0x00020000  //挂载点（文件系统）
 #endif
-#ifndef CLONE_NEWUTS
-#  define CLONE_NEWUTS            0x04000000
+#ifndef CLONE_NEWUTS                      
+#  define CLONE_NEWUTS            0x04000000  //主机名与域名
 #endif
 #ifndef CLONE_NEWIPC
-#  define CLONE_NEWIPC            0x08000000
+#  define CLONE_NEWIPC            0x08000000  //信号量、消息队列和共享内存
 #endif
 #ifndef CLONE_NEWUSER
-#  define CLONE_NEWUSER           0x10000000
+#  define CLONE_NEWUSER           0x10000000  //用户和用户组
 #endif
 #ifndef CLONE_NEWPID
-#  define CLONE_NEWPID            0x20000000
+#  define CLONE_NEWPID            0x20000000  //进程编号
 #endif
 #ifndef CLONE_NEWNET
-#  define CLONE_NEWNET            0x40000000
+#  define CLONE_NEWNET            0x40000000  //网络设备、网络栈、端口等等
 #endif
 
 #if defined(__ia64__)
