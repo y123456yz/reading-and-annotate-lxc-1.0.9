@@ -2943,6 +2943,7 @@ static const struct bdev_ops aufs_ops = {
 };
 
 
+//不同文件系统的ops
 static const struct bdev_type bdevs[] = {
 	{.name = "zfs", .ops = &zfs_ops,},
 	{.name = "lvm", .ops = &lvm_ops,},
@@ -2983,14 +2984,16 @@ struct bdev *bdev_get(const char *type)
 	return bdev;
 }
 
+////自动检测src目录是什么文件系统
 static const struct bdev_type *bdev_query(const char *src)
 {
 	int i;
 	for (i=0; i<numbdevs; i++) {
 		int r;
-		r = bdevs[i].ops->detect(src);
-		if (r)
+		r = bdevs[i].ops->detect(src); //自动检测src目录是什么文件系统
+		if (r) {
 			break;
+		}
 	}
 
 	if (i == numbdevs)

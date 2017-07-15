@@ -77,6 +77,7 @@ static int __sync_wake(int fd, int sequence)
 	return 0;
 }
 
+//发送sequece给子进程，子进程受到后回送seq+1，如果不回送，则一直这里等待
 static int __sync_barrier(int fd, int sequence)
 {
 	if (__sync_wake(fd, sequence))
@@ -131,6 +132,7 @@ int lxc_sync_init(struct lxc_handler *handler)
 	return 0;
 }
 
+//为什么要关掉sv[0]，因为父子进程只通过sv[1]通信
 void lxc_sync_fini_child(struct lxc_handler *handler)
 {
 	if (handler->sv[0] != -1) {

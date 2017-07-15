@@ -1,0 +1,4 @@
+lxc.utsname = host_name 
+lxc.rootfs = /usr/local/lib/lxc/rootfs
+lxc.mount = /usr/local/lib/lxc//fstab
+

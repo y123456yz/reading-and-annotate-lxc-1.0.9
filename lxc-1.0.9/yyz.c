@@ -11,4 +11,5 @@ rmdir lxc
 http://blog.csdn.net/shichaog/article/details/41378145
 内核同样为每个 /proc/PID/ns构建了符号链接，以使其指向包含标识命名空间类型字符串（字符串以inode号结尾）的名字。我们可以通过ls -l或者readlink命令查看名字。
 
+制作LXC文件系统:http://www.linuxidc.com/Linux/2013-11/92688.htm
 */

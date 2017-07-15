@@ -87,7 +87,7 @@
 # define IFLA_MACVLAN_MODE 1
 #endif
 
-
+//网卡ifindex变为pid进程所有
 int lxc_netdev_move_by_index(int ifindex, pid_t pid, const char* ifname)
 {
 	struct nl_handler nlh;
@@ -128,6 +128,7 @@ out:
 	return err;
 }
 
+//通知内核网卡ifname对应的ifindex变为pid进程所有
 int lxc_netdev_move_by_name(const char *ifname, pid_t pid, const char* newname)
 {
 	int index;

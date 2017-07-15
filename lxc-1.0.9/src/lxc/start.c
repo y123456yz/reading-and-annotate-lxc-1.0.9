@@ -151,7 +151,7 @@ bool preserve_ns(int ns_fd[LXC_NS_MAX], int clone_flags, pid_t pid, char **errms
          ................... ns_fd:/proc/63418/ns/uts
          ................... ns_fd:/proc/63418/ns/ipc
          ................... ns_fd:/proc/63418/ns/net
-         printf("yang test ................... ns_fd:%s\r\n", path);
+         printf("................... ns_fd:%s\r\n", path);
         */
 		
 		ns_fd[i] = open(path, O_RDONLY | O_CLOEXEC);
@@ -663,6 +663,8 @@ static int read_unpriv_netifindex(struct lxc_list *network)
 	return 0;
 }
 
+//主进程通过cgroup_enter(handler)会把子进程pid加入到控制组cgroup
+//do_start启动的时候设置CLONE_NEWNET等，就表示该子进程有自己的命名空间了
 static int do_start(void *data)
 {
 	struct lxc_handler *handler = data;
@@ -685,13 +687,14 @@ static int do_start(void *data)
 		return -1;
 	}
 
-	lxc_sync_fini_parent(handler);
+	lxc_sync_fini_parent(handler); //把不用的pipe关掉
 
 	/* don't leak the pinfd to the container */
 	if (handler->pinfd >= 0) {
 		close(handler->pinfd);
 	}
 
+    //给lxc_clone创建的clone的子进程发送LXC_SYNC_STARTUP信息，子进程受到后会回送LXC_SYNC_STARTUP
 	if (lxc_sync_wait_parent(handler, LXC_SYNC_STARTUP))
 		return -1;
 
@@ -712,7 +715,7 @@ static int do_start(void *data)
 	if (lxc_sync_barrier_parent(handler, LXC_SYNC_CONFIGURE))
 		return -1;
 
-	if (read_unpriv_netifindex(&handler->conf->network) < 0)
+	if (read_unpriv_netifindex(&handler->conf->network) < 0) //没有配置网络network
 		goto out_warn_father;
 
 	/*
@@ -759,6 +762,7 @@ static int do_start(void *data)
 	/* ask father to setup cgroups and wait for him to finish */
 	if (lxc_sync_barrier_parent(handler, LXC_SYNC_CGROUP))
 		return -1;
+    printf("yang test 3333333333333333\r\n");
 
 	/* Set the label to change to when we exec(2) the container's init */
 	if (!strcmp(lsm_name(), "AppArmor"))
@@ -767,6 +771,7 @@ static int do_start(void *data)
 		lsm_label = handler->conf->lsm_se_context;
 	if (lsm_process_label_set(lsm_label, 1, 1) < 0)
 		goto out_warn_father;
+    printf("yang test 4444444444444444\r\n");
 
 	/* Some init's such as busybox will set sane tty settings on stdin,
 	 * stdout, stderr which it thinks is the console. We already set them
@@ -779,6 +784,7 @@ static int do_start(void *data)
 
 	/* If we mounted a temporary proc, then unmount it now */
 	tmp_proc_unmount(handler->conf);
+    printf("yang test 5555555555555555\r\n");
 
 	if (lxc_seccomp_load(handler->conf) != 0)
 		goto out_warn_father;
@@ -787,6 +793,7 @@ static int do_start(void *data)
 		ERROR("failed to run start hooks for container '%s'.", handler->name);
 		goto out_warn_father;
 	}
+    printf("yang test 66666666666666666666666\r\n");
 
 	/* The clearenv() and putenv() calls have been moved here
 	 * to allow us to use environment variables passed to the various
@@ -807,7 +814,7 @@ static int do_start(void *data)
 
 	/* after this call, we are in error because this
 	 * ops should not return as it execs */
-	handler->ops->start(handler, handler->data);
+	handler->ops->start(handler, handler->data); //start  会一直在这里循环在
 
 out_warn_father:
 	/* we want the parent to know something went wrong, so we return a special
@@ -979,24 +986,24 @@ static int lxc_spawn(struct lxc_handler *handler)
 	if (handler->clone_flags & CLONE_NEWUSER)
 		flags &= ~CLONE_NEWNET;
 
-    printf("yang test ......%X\r\n", handler->clone_flags);
 	handler->pid = lxc_clone(do_start, handler, handler->clone_flags);
 	if (handler->pid < 0) {
 		SYSERROR("failed to fork into a new namespace");
 		goto out_delete_net;
 	}
 
+    //获取新的lxc_clone创建进程的pid的ns相关fd信息
 	if (!preserve_ns(handler->nsfd, handler->clone_flags | preserve_mask, handler->pid, &errmsg)) {
 		INFO("Failed to store namespace references for stop hook: %s",
 			errmsg ? errmsg : "(Out of memory)");
 		free(errmsg);
 	}
 
-	if (attach_ns(saved_ns_fd)) //attach各种命名空间
+	if (attach_ns(saved_ns_fd)) //attach当前进程的各种命名空间
 		WARN("failed to restore saved namespaces");
 
-     
-	lxc_sync_fini_child(handler);
+    //为什么要关掉sv[0]，因为父子进程只通过sv[1]通信
+	lxc_sync_fini_child(handler); 
 
 	/* map the container uids - the container became an invalid
 	 * userid the moment it was cloned with CLONE_NEWUSER - this
@@ -1008,30 +1015,36 @@ static int lxc_spawn(struct lxc_handler *handler)
 		goto out_delete_net;
 	}
 
-	if (lxc_sync_wake_child(handler, LXC_SYNC_STARTUP)) {
+	if (lxc_sync_wake_child(handler, LXC_SYNC_STARTUP)) { 
+	//给lxc_clone创建的clone的子进程发送LXC_SYNC_STARTUP信息，子进程受到后会回送LXC_SYNC_STARTUP
 		failed_before_rename = 1;
 		goto out_delete_net;
 	}
 
     //等待新的子进程告诉自己可以做LXC_SYNC_CONFIGURE这一步，参见do_start中的lxc_sync_barrier_parent，接下来交替完成各个LXC_SYNC_XXX
-	if (lxc_sync_wait_child(handler, LXC_SYNC_CONFIGURE)) {
+	if (lxc_sync_wait_child(handler, LXC_SYNC_CONFIGURE)) {//接受子进程的LXC_SYNC_CONFIGURE
 		failed_before_rename = 1;
 		goto out_delete_net;
 	}
 
-	if (!cgroup_create_legacy(handler)) {
+	if (!cgroup_create_legacy(handler)) {//mount点为ns的需要更改路径
 		ERROR("failed to setup the legacy cgroups for %s", name);
 		goto out_delete_net;
 	}
+/*
+按照配置修改参数，例如lxc.cgourp.memory.limit_in_bytes=5
+则往/sys/fs/cgroup/memory/lxc/yyz-test/memory.limit_in_bytes写5
+*/ //非lxc.cgroup.devices.XX相关的操作，后面cgroup_setup_limits是devices相关配置
 	if (!cgroup_setup_limits(handler, false)) {
 		ERROR("failed to setup the cgroup limits for '%s'", name);
 		goto out_delete_net;
 	}
 
+    //把子进程pid进程加入到cgruop,就是把进程pid写入/sys/fs/cgroup/freezer/lxc/yyz-test/tasks中，也就是字进程使用yyz-test cgroup控制组的资源
 	if (!cgroup_enter(handler))
 		goto out_delete_net;
 
-	if (!cgroup_chown(handler))
+	if (!cgroup_chown(handler)) //无处理
 		goto out_delete_net;
 
 	if (failed_before_rename)
@@ -1039,21 +1052,24 @@ static int lxc_spawn(struct lxc_handler *handler)
 
 	/* Create the network configuration */
 	if (handler->clone_flags & CLONE_NEWNET) {
+	    //通知内核网卡ifname对应的ifindex变为pid进程所有
 		if (lxc_assign_network(&handler->conf->network, handler->pid)) {
 			ERROR("failed to create the configured network");
 			goto out_delete_net;
 		}
 	}
 
+
 	if (netpipe != -1) {
 		struct lxc_list *iterator;
 		struct lxc_netdev *netdev;
 
 		close(netpipe);
-		lxc_list_for_each(iterator, &handler->conf->network) {
+		lxc_list_for_each(iterator, &handler->conf->network) { //主进程通知子进程网卡name
 			netdev = iterator->elem;
 			if (netdev->type != LXC_NET_VETH)
 				continue;
+				
 			if (write(netpipepair[1], netdev->name, IFNAMSIZ) != IFNAMSIZ) {
 				ERROR("Error writing veth name to container");
 				goto out_delete_net;
@@ -1064,16 +1080,16 @@ static int lxc_spawn(struct lxc_handler *handler)
 
 	/* Tell the child to continue its initialization.  we'll get
 	 * LXC_SYNC_CGROUP when it is ready for us to setup cgroups
-	 */
-	if (lxc_sync_barrier_child(handler, LXC_SYNC_POST_CONFIGURE))
+	 */ //向子进程发送LXC_SYNC_POST_CONFIGURE，子进程受到后回送LXC_SYNC_CGROUP
+	if (lxc_sync_barrier_child(handler, LXC_SYNC_POST_CONFIGURE)) 
 		goto out_delete_net;
 
-	if (!cgroup_setup_limits(handler, true)) {
+	if (!cgroup_setup_limits(handler, true)) { //lxc.cgroup.devices.XX相关的操作，前面cgroup_setup_limits是非devices相关配置
 		ERROR("failed to setup the devices cgroup for '%s'", name);
 		goto out_delete_net;
 	}
 
-	cgroup_disconnect();
+	cgroup_disconnect(); 
 	cgroups_connected = false;
 
 	/* Tell the child to complete its initialization and wait for
@@ -1083,13 +1099,13 @@ static int lxc_spawn(struct lxc_handler *handler)
 	 * success, or return a different value, causing us to error
 	 * out).
 	 */
-	if (lxc_sync_barrier_child(handler, LXC_SYNC_POST_CGROUP))
+	if (lxc_sync_barrier_child(handler, LXC_SYNC_POST_CGROUP)) //等待子进程运行，正常一直这里等待
 		return -1;
 
 	if (detect_shared_rootfs())
 		umount2(handler->conf->rootfs.mount, MNT_DETACH);
 
-	if (handler->ops->post_start(handler, handler->data))
+	if (handler->ops->post_start(handler, handler->data)) //post_start
 		goto out_abort;
 
 	if (lxc_set_state(name, handler, RUNNING)) {
@@ -1259,6 +1275,7 @@ struct start_args {
 	char *const *argv;
 };
 
+//do_start中执行
 static int start(struct lxc_handler *handler, void* data)
 {
 	struct start_args *arg = data;

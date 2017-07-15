@@ -32,7 +32,26 @@ struct lxc_handler;
 struct lxc_conf;
 struct lxc_list;
 
-struct cgroup_ops {
+/*
+static struct cgroup_ops cgfs_ops = {
+	.init = cgfs_init,
+	.destroy = cgfs_destroy,
+	.create = cgfs_create,
+	.enter = cgfs_enter,
+	.create_legacy = cgfs_create_legacy,
+	.get_cgroup = cgfs_get_cgroup,
+	.get = lxc_cgroupfs_get,
+	.set = lxc_cgroupfs_set,
+	.unfreeze = cgfs_unfreeze,
+	.setup_limits = cgroupfs_setup_limits,
+	.name = "cgroupfs",
+	.attach = lxc_cgroupfs_attach,
+	.chown = NULL,
+	.mount_cgroup = cgroupfs_mount_cgroup,
+	.nrtasks = cgfs_nrtasks,
+};
+*/
+struct cgroup_ops { //cgfs_ops  cgmanager_ops
 	const char *name;
 
 	void *(*init)(const char *name);

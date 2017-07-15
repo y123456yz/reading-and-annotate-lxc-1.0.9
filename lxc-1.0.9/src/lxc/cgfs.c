@@ -132,7 +132,7 @@ struct cgfs_data { //初始化见cgfs_init
 	char *name; //容器名
 	const char *cgroup_pattern; //默认//默认/lxc/%n  DEFAULT_CGROUP_PATTERN
 	struct cgroup_meta_data *meta; //赋值见lxc_cgroup_load_meta2
-	struct cgroup_process_info *info;
+	struct cgroup_process_info *info; //见cgfs_create
 };
 
 lxc_log_define(lxc_cgfs, lxc);
@@ -325,8 +325,8 @@ static bool find_cgroup_subsystems(char ***kernel_subsystems)
 			goto out;
 		kernel_subsystems_count++;
 
-        //yang test ...........cpuset, 7  1
-		//printf("yang test ...........%s, %d  %d\r\n",  line, hierarchy_number, (int)kernel_subsystems_count);
+        // ...........cpuset, 7  1
+		//printf("...........%s, %d  %d\r\n",  line, hierarchy_number, (int)kernel_subsystems_count);
 	}
 	bret = true;
 
@@ -888,7 +888,7 @@ static char *cgroup_rename_nsgroup(const char *mountpath, const char *oldname, p
 	}
 
 	DEBUG("'%s' renamed to '%s'", oldname, newname);
-
+    
 	return newname;
 }
 
@@ -1006,7 +1006,6 @@ static struct cgroup_process_info *lxc_cgroupfs_create(const char *name, const c
 		goto find_name_on_this_level;
 
 	cleanup_name_on_this_level:
-	    printf("yang test .........cleanup_name_on_this_level\r\n");
 		/* This is reached if we found a name clash.
 		 * In that case, remove the cgroup from all previous hierarchies
 		 */
@@ -1105,7 +1104,7 @@ static struct cgroup_process_info *lxc_cgroupfs_create(const char *name, const c
 			r = create_cgroup(info_ptr->designated_mount_point, current_entire_path);
 			// /sys/fs/cgroup/pids/lxc 返回值  -1  17  0        pids还可能是cpu,cpuacct等
 			// /sys/fs/cgroup/pids/lxc/yyz-test 返回值  0  17  1
-			//printf("yang test .........%s  %d  %d  %d\r\n", current_entire_path, r, errno, contains_name);
+			//printf(" .........%s  %d  %d  %d\r\n", current_entire_path, r, errno, contains_name);
 			if (r < 0 && errno == EEXIST && contains_name) { //一般不会进入这里面
 				/* name clash => try new name with new suffix */
 				free(current_entire_path);
@@ -1192,8 +1191,8 @@ static struct cgroup_process_info *lxc_cgroupfs_create(const char *name, const c
 		
 		info_ptr->cgroup_path = new_cgroup_paths[i];
 		info_ptr->cgroup_path_sub = new_cgroup_paths_sub[i];
-		//yang test .......... /lxc/yyz-test  (null)
-		//printf("yang test .......... %s  %s\r\n", info_ptr->cgroup_path, info_ptr->cgroup_path_sub);
+		//y .......... /lxc/yyz-test  (null)
+		//printf(" .......... %s  %s\r\n", info_ptr->cgroup_path, info_ptr->cgroup_path_sub);
 	}
 	/* don't use lxc_free_array since we used the array members
 	 * to store them in our result...
@@ -1216,6 +1215,7 @@ out_initial_error:
 	return NULL;
 }
 
+//mount点为ns的需要更改路径
 static int lxc_cgroup_create_legacy(struct cgroup_process_info *base_info, const char *name, pid_t pid)
 {
 	struct cgroup_process_info *info_ptr;
@@ -1236,6 +1236,7 @@ static int lxc_cgroup_create_legacy(struct cgroup_process_info *base_info, const
 				info_ptr->cgroup_path, pid, name);
 		if (!tmp)
 			return -1;
+	    //printf(".....oldname:%s, newname:%s\r\n", info_ptr->cgroup_path, tmp);
 		free(info_ptr->cgroup_path);
 		info_ptr->cgroup_path = tmp;
 		r = lxc_grow_array((void ***)&info_ptr->created_paths, &info_ptr->created_paths_capacity, info_ptr->created_paths_count + 1, 8);
@@ -1300,6 +1301,7 @@ out_error:
 }
 
 /* move a processs to the cgroups specified by the membership */
+//把pid进程加入到cgruop,就是把进程pid写入/sys/fs/cgroup/freezer/lxc/yyz-test/tasks中
 static int lxc_cgroupfs_enter(struct cgroup_process_info *info, pid_t pid, bool enter_sub)
 {
 	char pid_buf[32];
@@ -1330,6 +1332,13 @@ static int lxc_cgroupfs_enter(struct cgroup_process_info *info, pid_t pid, bool 
 			return -1;
 		}
 
+        /*
+        ..   /lxc/yyz-test, /sys/fs/cgroup/pids/lxc/yyz-test/tasks
+        ..   /lxc/yyz-test, /sys/fs/cgroup/freezer/lxc/yyz-test/tasks
+        ..   /lxc/yyz-test, /sys/fs/cgroup/hugetlb/lxc/yyz-test/tasks
+        .........
+        printf("yang test ..   %s, %s\r\n", cgroup_path, cgroup_tasks_fn);
+        */
 		r = lxc_write_to_file(cgroup_tasks_fn, pid_buf, strlen(pid_buf), false);
 		free(cgroup_tasks_fn);
 		if (r < 0) {
@@ -1447,6 +1456,7 @@ out1:
 	return result;
 }
 
+//把value写入filename,也就是把把配置文件cgroup解析内容写入cgroup相应文件
 static int lxc_cgroup_set_data(const char *filename, const char *value, struct cgfs_data *d)
 {
 	char *subsystem = NULL, *p, *path;
@@ -1459,6 +1469,11 @@ static int lxc_cgroup_set_data(const char *filename, const char *value, struct c
 
 	errno = ENOENT;
 	path = lxc_cgroup_get_hierarchy_abs_path_data(subsystem, d);
+	/*
+	........     memory.limit_in_bytes, 512M, /sys/fs/cgroup/memory/lxc/yyz-test
+    ........     cpuset.cpus, 0, /sys/fs/cgroup/cpuset/lxc/yyz-test
+	printf("........     %s, %s, %s\r\n", filename, value, path);
+	*/
 	if (path) {
 		ret = do_cgroup_set(path, filename, value);
 		int saved_errno = errno;
@@ -2126,7 +2141,11 @@ static int do_cgroup_set(const char *cgroup_path, const char *sub_filename,
 	filename = lxc_string_join("/", parts, false);
 	if (!filename)
 		return -1;
-
+    /*
+    ................../sys/fs/cgroup/memory/lxc/yyz-test/memory.limit_in_bytes
+    ................../sys/fs/cgroup/cpuset/lxc/yyz-test/cpuset.cpus
+    printf("..................%s\r\n", filename);
+	*/
 	ret = lxc_write_to_file(filename, value, strlen(value), false);
 	saved_errno = errno;
 	free(filename);
@@ -2134,6 +2153,10 @@ static int do_cgroup_set(const char *cgroup_path, const char *sub_filename,
 	return ret;
 }
 
+/*
+按照配置修改参数，例如lxc.cgourp.memory.limit_in_bytes=5
+则往/sys/fs/cgroup/memory/lxc/yyz-test/memory.limit_in_bytes写5
+*/
 static int do_setup_cgroup_limits(struct cgfs_data *d,
 			   struct lxc_list *cgroup_settings, bool do_devices)
 {
@@ -2152,13 +2175,30 @@ static int do_setup_cgroup_limits(struct cgfs_data *d,
 	lxc_list_for_each(iterator, sorted_cgroup_settings) {
 		cg = iterator->elem;
 
-		if (do_devices == !strncmp("devices", cg->subsystem, 7)) {
+        /*
+        LXC读写宿主机块设备，主要有两种方法：
+        
+        间接挂载 
+        先将块设备格式化后挂载在宿主机某个目录下， 
+        然后利用 lxc.mount.entry ，将该目录mount到LXC的rootfs某个目录， 
+        注意，必须先确定LXC中该挂载目录是存在的，然后再配置挂载，否则无法启动LXC
+        
+        直接读写 
+        利用lxc.cgroup.devices.allow，赋予LXC直接读写相应块设备的权限， 
+        这样就可以直接在LXC里面访问相应的块设备，进行格式化，挂载等操作
+        参考http://blog.sina.com.cn/s/blog_4da051a60102vfwx.html
+        */
+		if (do_devices == !strncmp("devices", cg->subsystem, 7)) {  //前n个字符相同，则返回0
+		//do_devices为false的时候lxc.cgroup中devices以外的配置走这里
+		//do_devices为ture的时候lxc.cgroup中devices的配置走这里
 			if (strcmp(cg->subsystem, "devices.deny") == 0 &&
 					cgroup_devices_has_allow_or_deny(d, cg->value, false))
 				continue;
 			if (strcmp(cg->subsystem, "devices.allow") == 0 &&
 					cgroup_devices_has_allow_or_deny(d, cg->value, true))
 				continue;
+
+				
 			if (lxc_cgroup_set_data(cg->subsystem, cg->value, d)) {
 				if (do_devices && (errno == EACCES || errno == EPERM)) {
 					WARN("Error setting %s to %s for %s",
@@ -2167,11 +2207,20 @@ static int do_setup_cgroup_limits(struct cgfs_data *d,
 				}
 				SYSERROR("Error setting %s to %s for %s",
 				      cg->subsystem, cg->value, d->name);
-				goto out;
+				goto out; //直接out
 			}
 		}
 
 		DEBUG("cgroup '%s' set to '%s'", cg->subsystem, cg->value);
+		/*
+        lxc.cgroup.devices.deny = a 
+        lxc.cgroup.devices.allow = c *:* m
+
+		
+	    ... cgroup 'devices.deny' set to 'a'
+        ... cgroup 'devices.allow' set to 'c *:* m'
+		printf(" ... cgroup '%s' set to '%s'\r\n", cg->subsystem, cg->value);
+		*/
 	}
 
 	ret = 0;
@@ -2563,7 +2612,8 @@ static inline bool cgfs_create(void *hdata)
 	return true;
 }
 
-static inline bool cgfs_enter(void *hdata, pid_t pid)
+//cgroup_enter中调用 //把pid进程加入到cgruop,就是把进程pid写入/sys/fs/cgroup/freezer/lxc/yyz-test/tasks中
+static inline bool cgfs_enter(void *hdata, pid_t pid) //pid是子进程Pid
 {
 	struct cgfs_data *d = hdata;
 	struct cgroup_process_info *i;
@@ -2577,6 +2627,7 @@ static inline bool cgfs_enter(void *hdata, pid_t pid)
 	return ret == 0;
 }
 
+////mount点为ns的需要更改路径
 static inline bool cgfs_create_legacy(void *hdata, pid_t pid)
 {
 	struct cgfs_data *d = hdata;
@@ -2620,6 +2671,7 @@ static bool cgfs_unfreeze(void *hdata)
 	return ret == 0;
 }
 
+//cgroup_setup_limits中调用
 static bool cgroupfs_setup_limits(void *hdata, struct lxc_list *cgroup_conf,
 				  bool with_devices)
 {

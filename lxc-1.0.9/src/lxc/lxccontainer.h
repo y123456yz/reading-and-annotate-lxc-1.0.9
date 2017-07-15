@@ -114,8 +114,7 @@ struct lxc_container {
 	bool daemonize;
 
 	/*! Full path to configuration file */
-	char *config_path; //默认/usr/local/var/lib/lxc   configure的时候指定
-
+	char *config_path; //默认/usr/local/var/lib/lxc   -D参数指定配置
 
 
     /*

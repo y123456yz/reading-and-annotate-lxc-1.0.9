@@ -84,18 +84,19 @@ bool cgroup_create(struct lxc_handler *handler)
 /*
  * Enter the container init into its new cgroups for all
  * requested controllers
- */
+ */ //把pid进程加入到cgruop,就是把进程pid写入/sys/fs/cgroup/freezer/lxc/yyz-test/tasks中
 bool cgroup_enter(struct lxc_handler *handler)
 {
 	if (ops)
-		return ops->enter(handler->cgroup_data, handler->pid);
+		return ops->enter(handler->cgroup_data, handler->pid); //cgfs_enter
 	return false;
 }
 
+//mount点为ns的需要更改路径
 bool cgroup_create_legacy(struct lxc_handler *handler)
 {
-	if (ops && ops->create_legacy)
-		return ops->create_legacy(handler->cgroup_data, handler->pid);
+	if (ops && ops->create_legacy) //cgfs_create_legacy   
+		return ops->create_legacy(handler->cgroup_data, handler->pid);//cgfs_create_legacy   
 	return true;
 }
 
@@ -113,11 +114,15 @@ bool cgroup_unfreeze(struct lxc_handler *handler)
 	return false;
 }
 
+/*
+按照配置修改参数，例如lxc.cgourp.memory.limit_in_bytes=5
+则往/sys/fs/cgroup/memory/lxc/yyz-test/memory.limit_in_bytes写5
+*/
 bool cgroup_setup_limits(struct lxc_handler *handler, bool with_devices)
 {
 	if (ops)
 		return ops->setup_limits(handler->cgroup_data,
-					 &handler->conf->cgroup, with_devices);
+					 &handler->conf->cgroup, with_devices); //cgroupfs_setup_limits
 	return false;
 }
 

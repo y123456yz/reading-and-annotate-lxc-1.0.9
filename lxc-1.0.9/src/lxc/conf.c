@@ -873,7 +873,7 @@ static int mount_rootfs(const char *rootfs, const char *target, const char *opti
 		{ S_IFREG, mount_rootfs_file },
 	};
 
-	if (!realpath(rootfs, absrootfs)) {
+	if (!realpath(rootfs, absrootfs)) {//realpath是用来将参数path所指的相对路径转换成绝对路径存入absrootfs
 		SYSERROR("failed to get real path for '%s'", rootfs);
 		return -1;
 	}
@@ -893,7 +893,7 @@ static int mount_rootfs(const char *rootfs, const char *target, const char *opti
 		if (!__S_ISTYPE(s.st_mode, rtfs_type[i].type))
 			continue;
 
-		return rtfs_type[i].cb(absrootfs, target, options);
+		return rtfs_type[i].cb(absrootfs, target, options); //挂载操作
 	}
 
 	ERROR("unsupported rootfs type for '%s'", absrootfs);
@@ -1613,21 +1613,26 @@ static int setup_rootfs(struct lxc_conf *conf)
 		return 0;
 	}
 
-	if (access(rootfs->mount, F_OK)) {
+	if (access(rootfs->mount, F_OK)) { //检测mount路径是否存在
 		SYSERROR("failed to access to '%s', check it is present",
 			 rootfs->mount);
 		return -1;
 	}
 
 	// First try mounting rootfs using a bdev
+	//获取文件系统类型
+	// ...... /usr/local/lib/lxc/rootfs, /, (null)  
+	//printf(" ...... %s, %s, %s\r\n", rootfs->path, rootfs->mount, rootfs->options);
 	struct bdev *bdev = bdev_init(rootfs->path, rootfs->mount, rootfs->options);
 	if (bdev && bdev->ops->mount(bdev) == 0) {
 		bdev_put(bdev);
 		DEBUG("mounted '%s' on '%s'", rootfs->path, rootfs->mount);
 		return 0;
 	}
-	if (bdev)
+	if (bdev) 
 		bdev_put(bdev);
+		
+	//把path rootfs->path 挂载到rootfs->mount	
 	if (mount_rootfs(rootfs->path, rootfs->mount, rootfs->options)) {
 		ERROR("failed to mount rootfs");
 		return -1;
@@ -2772,6 +2777,9 @@ static int setup_netdev(struct lxc_netdev *netdev)
 		netdev->name = netdev->type == LXC_NET_PHYS ?
 			netdev->link : "eth%d";
 
+    //printf("... netdev->name:%s  current_ifname:%s\r\n", netdev->name, current_ifname);
+    // netdev->name:eth%d  current_ifname:vethVAS2YC
+    //instantiate_veth:3135 - instantiated veth 'vethF42RGV/vethVAS2YC', index is '214'
 	/* rename the interface name */
 	if (strcmp(ifname, netdev->name) != 0) {
 		err = lxc_netdev_rename_by_name(ifname, netdev->name);
@@ -3064,7 +3072,7 @@ static int instantiate_veth(struct lxc_handler *handler, struct lxc_netdev *netd
 		goto out_delete;
 	}
 
-    //printf("yang test .............. veth1:%s, veth2:%s\r\n", veth1, veth2);   veth1:vethTYDHJ1, veth2:vethHWV7N4
+    //printf(".............. veth1:%s, veth2:%s\r\n", veth1, veth2);   veth1:vethTYDHJ1, veth2:vethHWV7N4
 	err = lxc_veth_create(veth1, veth2);
 	if (err) {
 		ERROR("failed to create veth pair (%s and %s): %s", veth1, veth2,
@@ -3096,7 +3104,7 @@ static int instantiate_veth(struct lxc_handler *handler, struct lxc_netdev *netd
 	//  ifconfig br0 10.10.1.1 netmask 255.255.0.0 up  创建虚拟网桥过程
     //  ifconfig virbr0 10.10.1.1 netmask 255.255.0.0 up
 
-    //printf("yang test .............. link:%s\r\n", netdev->link);  lxc.network.link = virbr0中的virbro字符串
+    //printf(" .............. link:%s\r\n", netdev->link);  lxc.network.link = virbr0中的virbro字符串
 	if (netdev->link) {
 		err = lxc_bridge_attach(netdev->link, veth1); //veth1在宿主机上创建的接口可以在宿主机上通过ifconfig看到
 		if (err) {
@@ -3106,7 +3114,8 @@ static int instantiate_veth(struct lxc_handler *handler, struct lxc_netdev *netd
 		}
 	}
 
-	netdev->ifindex = if_nametoindex(veth2); //获取veth2对应的网卡index
+	netdev->ifindex = if_nametoindex(veth2); 
+	//获取veth2对应的网卡index   注意这里只记录下来veth2的，veth1的没有记录
 	if (!netdev->ifindex) {
 		ERROR("failed to retrieve the index for %s", veth2);
 		goto out_delete;
@@ -3524,12 +3533,13 @@ static int unpriv_assign_nic(struct lxc_netdev *netdev, pid_t pid)
 	return 0;
 }
 
+//通知内核网卡ifname对应的ifindex变为pid进程所有
 int lxc_assign_network(struct lxc_list *network, pid_t pid)
 {
 	struct lxc_list *iterator;
 	struct lxc_netdev *netdev;
 	char ifname[IFNAMSIZ];
-	int am_root = (getuid() == 0);
+	int am_root = (getuid() == 0); //一般root用户 getuid为0
 	int err;
 
 	lxc_list_for_each(iterator, network) {
@@ -3555,6 +3565,7 @@ int lxc_assign_network(struct lxc_list *network, pid_t pid)
 			return -1;
 		}
 
+        //通知内核网卡ifname对应的ifindex变为pid进程所有
 		err = lxc_netdev_move_by_name(ifname, pid, NULL);
 		if (err) {
 			ERROR("failed to move '%s' to the container : %s",
@@ -4196,7 +4207,7 @@ void remount_all_slave(void)
 /*
  * This does the work of remounting / if it is shared, calling the
  * container pre-mount hooks, and mounting the rootfs.
- */
+ */ //把lxc.rootfs跟文件系统挂载到--with-rootfs-path=/xx配置的地方
 int do_rootfs_setup(struct lxc_conf *conf, const char *name, const char *lxcpath)
 {
 	if (conf->rootfs_setup) {
@@ -4213,7 +4224,8 @@ int do_rootfs_setup(struct lxc_conf *conf, const char *name, const char *lxcpath
 	}
 
 	remount_all_slave();
-
+	
+    //执行对应hook配置的脚本
 	if (run_lxc_hooks(name, "pre-mount", conf, lxcpath, NULL)) {
 		ERROR("failed to run pre-mount hooks for container '%s'.", name);
 		return -1;
@@ -4260,19 +4272,21 @@ int lxc_setup(struct lxc_handler *handler)
 	const char *lxcpath = handler->lxcpath;
 	void *data = handler->data;
 
+    //把lxc.rootfs配置的跟文件系统挂载到--with-rootfs-path=/xx配置的地方
 	if (do_rootfs_setup(lxc_conf, name, lxcpath) < 0) {
 		ERROR("Error setting up rootfs mount after spawn");
 		return -1;
 	}
 
 	if (lxc_conf->inherit_ns_fd[LXC_NS_UTS] == -1) {
+	    printf("yang test ...... inherit ns fd\r\n");
 		if (setup_utsname(lxc_conf->utsname)) {
 			ERROR("failed to setup the utsname for '%s'", name);
 			return -1;
 		}
 	}
 
-	if (setup_network(&lxc_conf->network)) {
+	if (setup_network(&lxc_conf->network)) { //子进程命名空间网络设置
 		ERROR("failed to setup the network for '%s'", name);
 		return -1;
 	}
@@ -4375,6 +4389,7 @@ int lxc_setup(struct lxc_handler *handler)
 		ERROR("failed to setup personality");
 		return -1;
 	}
+    printf("yang test 22222222\r\n");
 
 	if (!lxc_list_empty(&lxc_conf->keepcaps)) {
 		if (!lxc_list_empty(&lxc_conf->caps)) {
@@ -4390,6 +4405,7 @@ int lxc_setup(struct lxc_handler *handler)
 		return -1;
 	}
 
+    printf("yang test 1111111111111\r\n");
 	NOTICE("'%s' is setup.", name);
 
 	return 0;
@@ -4993,7 +5009,7 @@ static void free_cgroup_settings(struct lxc_list *result)
 /*
  * Return the list of cgroup_settings sorted according to the following rules
  * 1. Put memory.limit_in_bytes before memory.memsw.limit_in_bytes
- */
+ */ //获取lxc.cgroup.xxx相关的配置，存入链表返回，保证lxc.cgroup.memory.memsw.limit_in_bytes配置必须在lxc.cgroup.memory.limit_in_bytes前面
 struct lxc_list *sort_cgroup_settings(struct lxc_list* cgroup_settings)
 {
 	struct lxc_list *result;
@@ -5019,6 +5035,27 @@ struct lxc_list *sort_cgroup_settings(struct lxc_list* cgroup_settings)
 		}
 		item->elem = it->elem;
 		cg = it->elem;
+		/*
+        其中，很明显有两组对应的文件，一组带 memsw ，另一组不带
+        
+        memory.failcnt
+        memory.limit_in_bytes
+        memory.max_usage_in_bytes
+        memory.usage_in_bytes
+        
+        memory.memsw.failcnt
+        memory.memsw.limit_in_bytes
+        memory.memsw.max_usage_in_bytes
+        memory.memsw.usage_in_bytes
+        带 memsw 的表示虚拟内存，即物理内存加交换区。不带 memsw 的那组仅包括物理内存。其中，limit_in_bytes 
+        是用来限制内存使用的，其他的则是统计报告。
+        
+    # echo 10485760 >/sys/fs/cgroup/memory/foo/memory.limit_in_bytes
+        即可限制该组中的进程使用的物理内存总量不超过 10MB。对 memory.memsw.limit_in_bytes 来说，则是限制
+        虚拟内存使用。memory.memsw.limit_in_bytes 必须大于或等于 memory.limit_in_byte。这些值还可以用更
+        方便的 100M，20G 这样的形式来设置。要解除限制，就把这个值设为 -1 即可。
+
+		*/
 		if (strcmp(cg->subsystem, "memory.memsw.limit_in_bytes") == 0) {
 			/* Store the memsw_limit location */
 			memsw_limit = item;
@@ -5026,7 +5063,8 @@ struct lxc_list *sort_cgroup_settings(struct lxc_list* cgroup_settings)
 			/* lxc.cgroup.memory.memsw.limit_in_bytes is found before
 			 * lxc.cgroup.memory.limit_in_bytes, swap these two items */
 			item->elem = memsw_limit->elem;
-			memsw_limit->elem = it->elem;
+			//lxc.cgroup.memory.memsw.limit_in_bytes配置必须在lxc.cgroup.memory.limit_in_bytes前面
+			memsw_limit->elem = it->elem; 
 		}
 		lxc_list_add_tail(result, item);
 	}

@@ -61,7 +61,7 @@
 
 struct bdev;
 
-struct bdev_ops {
+struct bdev_ops { //见bdevs
 	/* detect whether path is of this bdev type */
 	int (*detect)(const char *path);
 	// mount requires src and dest to be set.
@@ -85,7 +85,7 @@ struct bdev_ops {
  * we may need to rsync from one to the other.
  * data is so far unused.
  */
-struct bdev {
+struct bdev { //创建空间和初始化见bdev_init
 	const struct bdev_ops *ops;
 	const char *type;
 	char *src;

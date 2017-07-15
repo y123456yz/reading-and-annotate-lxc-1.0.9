@@ -832,6 +832,7 @@ size_t lxc_array_len(void **array)
 	return result;
 }
 
+//把value写入filename文件
 int lxc_write_to_file(const char *filename, const void* buf, size_t count, bool add_newline)
 {
 	int fd, saved_errno;

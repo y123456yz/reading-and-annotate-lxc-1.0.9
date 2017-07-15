@@ -26,13 +26,15 @@
 struct lxc_handler;
 
 enum {
+    //父进程给lxc_clone创建的clone的子进程发送LXC_SYNC_STARTUP信息，子进程受到后会回送LXC_SYNC_STARTUP
 	LXC_SYNC_STARTUP,
-	LXC_SYNC_CONFIGURE,
-	LXC_SYNC_POST_CONFIGURE,
+	LXC_SYNC_CONFIGURE,  //1
+	LXC_SYNC_POST_CONFIGURE,//向子进程发送LXC_SYNC_POST_CONFIGURE，子进程受到后回送LXC_SYNC_CGROUP
 	LXC_SYNC_CGROUP,
 	LXC_SYNC_POST_CGROUP,
-	LXC_SYNC_RESTART,
+	LXC_SYNC_RESTART, //5
 	LXC_SYNC_POST_RESTART,
+	//子进程异常，通知主进程
 	LXC_SYNC_ERROR = -1 /* Used to report errors from another process */
 };
 
