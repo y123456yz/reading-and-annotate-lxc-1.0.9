@@ -962,6 +962,13 @@ static int set_pidfile(char *pidfile)
 	return fd;
 }
 
+/*
+-s is required to turn off multi-threading as libnih-dbus isn't thread safe.
+
+-f is to keep lxcfs running in the foreground
+
+-o allow_other is required to have non-root user be able to access the filesystem
+*/
 //²Î¿¼http://way.xiaojukeji.com/article/4661
 int main(int argc, char *argv[])
 {
