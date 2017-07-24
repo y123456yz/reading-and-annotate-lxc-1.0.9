@@ -779,6 +779,7 @@ static int do_start(void *data)
 		lsm_label = handler->conf->lsm_se_context;
 	if (lsm_process_label_set(lsm_label, 1, 1) < 0)
 		goto out_warn_father;
+    printf("yang test 4444444444444444\r\n");
 
 
 	/* Some init's such as busybox will set sane tty settings on stdin,
@@ -792,6 +793,7 @@ static int do_start(void *data)
 
 	/* If we mounted a temporary proc, then unmount it now */
 	tmp_proc_unmount(handler->conf);
+    printf("yang test 5555555555555555\r\n");
 
 	if (lxc_seccomp_load(handler->conf) != 0) //seccomp配置相关
 		goto out_warn_father;
@@ -800,6 +802,7 @@ static int do_start(void *data)
 		ERROR("failed to run start hooks for container '%s'.", handler->name);
 		goto out_warn_father;
 	}
+    printf("yang test 66666666666666666666666\r\n");
 
 	/* The clearenv() and putenv() calls have been moved here
 	 * to allow us to use environment variables passed to the various
@@ -1104,7 +1107,8 @@ static int lxc_spawn(struct lxc_handler *handler)
 	 * sync pipe, causing lxc_sync_barrier_child to return
 	 * success, or return a different value, causing us to error
 	 * out).
-	 */ //子进程执行exec'ing '/sbin/init'后，主进程受到该seq
+	 */ 
+	 //子进程执行exec'ing '/sbin/init'后，主进程受到该seq
 	if (lxc_sync_barrier_child(handler, LXC_SYNC_POST_CGROUP)) //等待子进程运行，正常一直这里等待
 		return -1;
 

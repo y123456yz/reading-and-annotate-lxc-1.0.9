@@ -119,7 +119,7 @@ struct start_arg {
 	const char *want_hostname;
 };
 
-
+//主进程通过cgroup_enter(handler)会把子进程pid加入到控制组cgroup
 static int do_start(void *arg)
 {
 	struct start_arg *start_arg = arg;

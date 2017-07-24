@@ -1338,9 +1338,9 @@ static int lxc_cgroupfs_enter(struct cgroup_process_info *info, pid_t pid, bool 
         ..   /lxc/yyz-test, /sys/fs/cgroup/pids/lxc/yyz-test/tasks
         ..   /lxc/yyz-test, /sys/fs/cgroup/freezer/lxc/yyz-test/tasks
         ..   /lxc/yyz-test, /sys/fs/cgroup/hugetlb/lxc/yyz-test/tasks
-        .........
+        printf("yang test ..   %s, %s\r\n", cgroup_path, cgroup_tasks_fn);
         
-        */  printf("yang test ..   %s, %s\r\n", cgroup_path, cgroup_tasks_fn);
+        */  
 		r = lxc_write_to_file(cgroup_tasks_fn, pid_buf, strlen(pid_buf), false);
 		free(cgroup_tasks_fn);
 		if (r < 0) {

@@ -1633,7 +1633,7 @@ static int setup_rootfs(struct lxc_conf *conf)
 	// First try mounting rootfs using a bdev
 	//获取文件系统类型
 	// ...... /usr/local/lib/lxc/rootfs, /, (null)  
-	printf(" ...... %s, %s, %s\r\n", rootfs->path, rootfs->mount, rootfs->options);
+	//printf(" ...... %s, %s, %s\r\n", rootfs->path, rootfs->mount, rootfs->options);
 	struct bdev *bdev = bdev_init(rootfs->path, rootfs->mount, rootfs->options);
 	if (bdev && bdev->ops->mount(bdev) == 0) {
 		bdev_put(bdev);
@@ -4312,10 +4312,10 @@ int lxc_setup(struct lxc_handler *handler)
 	if (lxc_conf->inherit_ns_fd[LXC_NS_UTS] == -1) {
 	    /*
 	    ............ sysname:
-     nodename:host_name
-     release:
-     version:
-     machine:
+         nodename:host_name
+         release:
+         version:
+         machine:
 	    //printf("............ sysname:%s\n nodename:%s\n release:%s\n version:%s\n machine:%s\n \n ",\
                     lxc_conf->utsname->sysname,\
                     lxc_conf->utsname->nodename,\
@@ -4434,6 +4434,7 @@ int lxc_setup(struct lxc_handler *handler)
 		ERROR("failed to setup personality");
 		return -1;
 	}
+    printf("yang test 22222222\r\n");
 
 	if (!lxc_list_empty(&lxc_conf->keepcaps)) {
 		if (!lxc_list_empty(&lxc_conf->caps)) {
@@ -4449,6 +4450,7 @@ int lxc_setup(struct lxc_handler *handler)
 		return -1;
 	}
 
+    printf("yang test 1111111111111\r\n");
 	NOTICE("'%s' is setup.", name);
 
 	return 0;
