@@ -832,10 +832,12 @@ size_t lxc_array_len(void **array)
 	return result;
 }
 
+//把value写入filename文件
 int lxc_write_to_file(const char *filename, const void* buf, size_t count, bool add_newline)
 {
 	int fd, saved_errno;
 	ssize_t ret;
+    //printf("yang test .xx.   %s, %s\r\n", filename, (char *)buf);
 
 	fd = open(filename, O_WRONLY | O_TRUNC | O_CREAT | O_CLOEXEC, 0666);
 	if (fd < 0)
@@ -1040,18 +1042,19 @@ int detect_shared_rootfs(void)
  * " - rootfs rootfs "
  * IIUC, so long as we've chrooted so that rootfs is not our root,
  * the rootfs entry should always be skipped in mountinfo contents.
- */
-int detect_ramfs_rootfs(void)
+ */  
+int detect_ramfs_rootfs(void) 
 {
 	char buf[LINELEN], *p;
 	FILE *f;
 	int i;
 	char *p2;
 
-	f = fopen("/proc/self/mountinfo", "r");
+	f = fopen("/proc/self/mountinfo", "r"); //检测该文件中是否有 - rootfs rootfs 这样的字符串
 	if (!f)
 		return 0;
 	while (fgets(buf, LINELEN, f)) {
+	    //printf("detect_ramfs_rootfs............ buf:%s\r\n", buf);
 		for (p = buf, i=0; p && i < 4; i++)
 			p = strchr(p+1, ' ');
 		if (!p)

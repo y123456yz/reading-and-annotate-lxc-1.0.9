@@ -121,19 +121,20 @@ union netdev_p {
 struct lxc_netdev { //解析配置文件的lxc.network相关配置项获取
 	int type; //LXC_NET_VETH等
 	int flags;
+	//只记录下来veth2的，veth1的没有记录  子进程用的是veth2的
 	int ifindex; //每个网卡在内核都有对应的index,赋值见instantiate_veth  存储的是容器端的网卡的index，可以参考instantiate_veth
-	char *link;//lxc.network.link = virbr0中的virbro字符串
-	char *name;
+	char *link;//lxc.network.link = virbr0中的virbro字符串  ethx等
+	char *name; //网卡接口名，如eth0等
 	char *hwaddr;
 	char *mtu;
 	union netdev_p priv;
 	struct lxc_list ipv4;
 	struct lxc_list ipv6;
 	struct in_addr *ipv4_gateway; //赋值见config_network_ipv4_gateway
-	bool ipv4_gateway_auto; //赋值见config_network_ipv4_gateway
+	bool ipv4_gateway_auto; //赋值见config_network_ipv4_gateway  auto 或者gw地址
 	struct in6_addr *ipv6_gateway;
 	bool ipv6_gateway_auto;
-	char *upscript;
+	char *upscript; //lxc.network.script.up 配置网络脚步
 	char *downscript;
 };
 
@@ -143,9 +144,9 @@ struct lxc_netdev { //解析配置文件的lxc.network相关配置项获取
  * @subsystem : the targeted subsystem
  * @value     : the value to set
  */
-struct lxc_cgroup {
-	char *subsystem;
-	char *value;
+struct lxc_cgroup {  
+	char *subsystem;//配置项中的key
+	char *value;//配置项中的value
 };
 
 enum idtype {
@@ -218,10 +219,11 @@ struct lxc_console {
  * optionals pivot_root, rootfs mount paths
  * @rootfs     : a path to the rootfs
  * @pivot_root : a path to a pivot_root location to be used
- */
-struct lxc_rootfs {
-	char *path;
-	char *mount;
+ */ //把path rootfs->path 挂载到rootfs->mount	
+struct lxc_rootfs { //把path mount到mount(lxc.rootfs配置位置),见setup_rootfs
+    char *path; //lxc.rootfs配置  DEBUG("mounted '%s' on '%s'", rootfs->path, rootfs->mount);
+    //在setup_rootfs_pivot_root中指定子进程跟目录为setup_rootfs_pivot_root
+	char *mount; //默认值default_rootfs_mount  ./configure --with-rootfs-path=/lxc/rootfs/ 设置  挂载点
 	char *pivot;
 	char *options;
 };
@@ -296,9 +298,9 @@ struct lxc_conf {
 	int need_utmp_watch;
 	signed long personality;
 	struct utsname *utsname;
-	struct lxc_list cgroup;
+	struct lxc_list cgroup; //解析lxc.cgroup.xx配置获取存入该链表，见config_cgroup
 	struct lxc_list id_map;
-	//赋值是通过解析配置文件中的lxc.network.xxx相关的配置项，然后通过get_netdev_from_key加入到链表
+	//赋值是通过解析配置文件中的lxc.network.xxx相关的配置项，然后通过config_network_type加入到链表
 	struct lxc_list network; 
 	struct saved_nic *saved_nics;
 	int num_savednics; //赋值见save_phys_nics
@@ -325,7 +327,7 @@ struct lxc_conf {
 #endif
 	int maincmd_fd;  //域套接字对应的链接sock
 	int autodev;  // if 1, mount and fill a /dev at start
-	int haltsignal; // signal used to halt container
+	int haltsignal; // signal used to halt container  lxc.haltsignal 配置
 	int stopsignal; // signal used to hard stop container
 	int kmsg;  // if 1, create /dev/kmsg symlink
 	//赋值见  lxc_config_read   -f指定的配置文件
@@ -348,7 +350,7 @@ struct lxc_conf {
 	int nbd_idx;
 
 	/* set to true when rootfs has been setup */
-	bool rootfs_setup;
+	bool rootfs_setup; //rootfs是否已mount，见do_rootfs_setup
 };
 
 int run_lxc_hooks(const char *name, char *hook, struct lxc_conf *conf,

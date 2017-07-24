@@ -77,6 +77,7 @@ lxc_state_t lxc_getstate(const char *name, const char *lxcpath)
 	return state;
 }
 
+//根据"STOPPED"等字符串转换为对应的lxc_state2str状态码lxc_state_t，状态码存储到states中
 static int fillwaitedstates(const char *strstates, int *states)
 {
 	char *token, *saveptr = NULL;
@@ -95,7 +96,7 @@ static int fillwaitedstates(const char *strstates, int *states)
 			return -1;
 		}
 
-		states[state] = 1;
+		states[state] = 1; 
 
 		token = strtok_r(NULL, "|", &saveptr);
 	}
@@ -109,8 +110,9 @@ extern int lxc_wait(const char *lxcname, const char *states, int timeout, const 
 	int state, ret;
 	int s[MAX_STATE] = { }, fd;
 
-	if (fillwaitedstates(states, s))
-		return -1;
+    //根据"STOPPED"等字符串转换为对应的lxc_state2str状态码lxc_state_t，状态码存储到states中
+	if (fillwaitedstates(states, s)) //获取states字符串对应的状态码存入到s中
+		return -1; 
 
 	if (lxc_monitord_spawn(lxcpath))
 		return -1;
@@ -155,7 +157,7 @@ extern int lxc_wait(const char *lxcname, const char *states, int timeout, const 
 			if (retval)
 				goto out_close;
 			elapsed_time = tv.tv_sec - curtime;
-			if (timeout - elapsed_time <= 0)
+			if (timeout - elapsed_time <= 0) //说明超时时间已经到了，则退出
 				stop = 1;
 			timeout -= elapsed_time;
 		}
@@ -168,7 +170,7 @@ extern int lxc_wait(const char *lxcname, const char *states, int timeout, const 
 			continue;
 		}
 
-		switch (msg.type) {
+		switch (msg.type) {  //这里主要是针对wait_on_daemonized_start
 		case lxc_msg_state:
 			if (msg.value < 0 || msg.value >= MAX_STATE) {
 				ERROR("Receive an invalid state number '%d'",

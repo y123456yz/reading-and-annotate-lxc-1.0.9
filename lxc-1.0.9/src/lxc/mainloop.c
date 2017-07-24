@@ -28,7 +28,9 @@
 #include <unistd.h>
 #include <sys/epoll.h>
 
+#include "log.h"
 #include "mainloop.h"
+
 
 struct mainloop_handler {
 	lxc_mainloop_callback_t callback;
@@ -58,7 +60,7 @@ int lxc_mainloop(struct lxc_epoll_descr *descr, int timeout_ms)
 				(struct mainloop_handler *) events[i].data.ptr;
 
 			/* If the handler returns a positive value, exit
-			   the mainloop */
+			   the mainloop */ //signal_handler信号处理  lxc_cmd_handler网络读写处理
 			if (handler->callback(handler->fd, events[i].events,
 					      handler->data, descr) > 0)
 				return 0;
@@ -72,6 +74,7 @@ int lxc_mainloop(struct lxc_epoll_descr *descr, int timeout_ms)
 	}
 }
 
+//信号fd添加到epoll时间列表
 int lxc_mainloop_add_handler(struct lxc_epoll_descr *descr, int fd,
 			     lxc_mainloop_callback_t callback, void *data)
 {

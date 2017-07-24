@@ -1,0 +1,4 @@
+       lxc-stop 1500533651.953 ERROR    lxc_monitor - monitor.c:lxc_monitor_open:211 - connect : backing off 10
+       lxc-stop 1500533651.964 ERROR    lxc_monitor - monitor.c:lxc_monitor_open:211 - connect : backing off 50
+       lxc-stop 1500533652.015 ERROR    lxc_monitor - monitor.c:lxc_monitor_open:211 - connect : backing off 100
+       lxc-stop 1500533652.116 ERROR    lxc_monitor - monitor.c:lxc_monitor_open:216 - connect : Connection refused

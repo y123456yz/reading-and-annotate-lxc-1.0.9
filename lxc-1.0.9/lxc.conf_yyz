@@ -1,10 +1,9 @@
-
-lxc.mount.auto = proc:rw sys:ro cgroup:mixed
+lxc.mount.auto = proc:rw sys:ro 
 lxc.tty = 4
 lxc.pts = 1024
 lxc.devttydir = lxc
 lxc.arch = x86_64
-lxc.seccomp = ./yyzdir/common.seccomp
+lxc.seccomp = /root/yyzdir/common.seccomp
 lxc.kmsg = 0
 lxc.autodev = 1
 lxc.cgroup.devices.deny = a
@@ -26,26 +25,27 @@ lxc.utsname = yyztest1
 #lxc.network.hwaddr = 00:16:3e:21:39:ed
 #lxc.network.ipv4 = bind_ip
 #lxc.network.ipv4.gateway = gateway_ip
-lxc.cap.drop = mac_admin
-lxc.cap.drop = mac_override
-lxc.cap.drop = setfcap
-lxc.cap.drop = sys_module
-lxc.cap.drop = sys_nice
-lxc.cap.drop = sys_pacct
-lxc.cap.drop = sys_rawio
-lxc.cap.drop = sys_time
-lxc.hook.clone = ./yyzdir/clonehostname
+
+#lxc.cap.drop = mac_admin
+#lxc.cap.drop = mac_override
+#lxc.cap.drop = setfcap
+#lxc.cap.drop = sys_module
+#lxc.cap.drop = sys_nice
+#lxc.cap.drop = sys_pacct
+#lxc.cap.drop = sys_rawio
+#lxc.cap.drop = sys_time
+
+lxc.hook.clone = /root/yyzdir/clonehostname
 lxc.cgroup.memory.limit_in_bytes = 512M
 #lxc.cgroup.memory.memsw.limit_in_bytes = 1G
 lxc.cgroup.cpuset.cpus = 0
-#lxc.include = ./yyzdir/common.conf.d/00-lxcfs.conf
+#lxc.include = /root/yyzdir/common.conf.d/00-lxcfs.conf
 #lxc.mount.entry = /data11 data11 none rw,bind 0 0
 #lxc.rootfs = /home/xiaoju/lxc/6f2cd8ad5eed4cac93b4f5b5c0b55af5/root
-lxc.rootfs = ./yyzdir/root
+lxc.rootfs = /root/yyzdir/rootfs
 lxc.network.type = veth
 lxc.network.flags = up
 lxc.network.link = virbr0
 lxc.network.ipv4 = 172.23.133.33/24
 lxc.network.ipv4.gateway = 172.23.133.1
-lxc.mount.entry = /boot boot none rw,bind 0 0
-
+lxc.network.name = xxccc

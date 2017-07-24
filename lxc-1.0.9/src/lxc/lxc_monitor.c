@@ -172,7 +172,8 @@ int main(int argc, char *argv[])
 
 	setlinebuf(stdout);
 
-	for (;;) {
+	for (;;) { //主要是获取容器的lxc_state2str运行状态 
+	//"STOPPED", "STARTING", "RUNNING", "STOPPING","ABORTING", "FREEZING", "FROZEN", "THAWED",
 		if (lxc_monitor_read_fdset(fds, nfds, &msg, -1) < 0) {
 			rc_main = 1;
 			goto close_and_clean;

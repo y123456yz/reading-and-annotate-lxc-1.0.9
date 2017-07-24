@@ -122,6 +122,7 @@ static int fill_sock_name(char *path, int len, const char *name,
 		return -1;
 	}
 
+    
 	return 0;
 }
 
@@ -267,7 +268,7 @@ static int lxc_cmd_rsp_send(int fd, struct lxc_cmd_rsp *rsp)
  * will notice the fd on its side of the socket in its mainloop select and
  * then free the slot with lxc_cmd_fd_cleanup(). The socket fd will be
  * returned in the cmd response structure.
- */
+ */ //通过unix套接字和容器container发起连接，如果连接成功则发送LXC_CMD_CONSOLE给容器，容器受到后会给出应答，从而判断容器在线
 static int lxc_cmd(const char *name, struct lxc_cmd_rr *cmd, int *stopped,
 		   const char *lxcpath, const char *hashed_sock_name)
 {
@@ -376,11 +377,11 @@ int lxc_try_cmd(const char *name, const char *lxcpath)
  * @lxcpath   : the lxcpath in which the container is running
  *
  * Returns the pid on success, < 0 on failure
- */
+ */ //获取container /sbin/init进程的id号
 pid_t lxc_cmd_get_init_pid(const char *name, const char *lxcpath)
 {
 	int ret, stopped;
-	struct lxc_cmd_rr cmd = {
+	struct lxc_cmd_rr cmd = { //主进程在lxc_cmd_accept 通过epoll accept客户端请求，最终调用lxc_cmd_process获取客户端需要的信息返回返回
 		.req = { .cmd = LXC_CMD_GET_INIT_PID },
 	};
 
@@ -634,7 +635,8 @@ static int lxc_cmd_stop_callback(int fd, struct lxc_cmd_req *req,
 	if (handler->conf->stopsignal)
 		stopsignal = handler->conf->stopsignal;
 	memset(&rsp, 0, sizeof(rsp));
-	rsp.ret = kill(handler->pid, stopsignal);
+
+	rsp.ret = kill(handler->pid, stopsignal); //向子进程发送SIGKILL信号
 	if (!rsp.ret) {
 		/* we can't just use lxc_unfreeze() since we are already in the
 		 * context of handling the STOP cmd in lxc-start, and calling
@@ -835,6 +837,7 @@ static int lxc_cmd_get_lxcpath_callback(int fd, struct lxc_cmd_req *req,
 	return lxc_cmd_rsp_send(fd, &rsp);
 }
 
+//主进程在lxc_cmd_accept 通过epoll accept客户端请求，最终调用lxc_cmd_process获取客户端需要的信息返回返回
 static int lxc_cmd_process(int fd, struct lxc_cmd_req *req,
 			   struct lxc_handler *handler)
 {
@@ -868,6 +871,10 @@ static void lxc_cmd_fd_cleanup(int fd, struct lxc_handler *handler,
 	close(fd);
 }
 
+//signal_handler信号处理  lxc_cmd_handler网络读写处理
+
+//解析客户端的请求，例如lxc-start主进程会收到客户端lxc-stop发送过来的stop请求，解析没问题然后调用
+//lxc_cmd_process发送相应signal信号给lxc-start容器进程
 static int lxc_cmd_handler(int fd, uint32_t events, void *data,
 			   struct lxc_epoll_descr *descr)
 {
@@ -933,6 +940,9 @@ out_close:
 	goto out;
 }
 
+//lxc_cmd_accept(lxc_cmd_handler)
+//解析客户端的请求，例如lxc-start主进程会收到客户端lxc-stop发送过来的stop请求，解析没问题然后调用
+//lxc_cmd_process发送相应signal信号给lxc-start容器进程
 static int lxc_cmd_accept(int fd, uint32_t events, void *data,
 			  struct lxc_epoll_descr *descr)
 {
@@ -955,7 +965,9 @@ static int lxc_cmd_accept(int fd, uint32_t events, void *data,
 		goto out_close;
 	}
 
-	ret = lxc_mainloop_add_handler(descr, connection, lxc_cmd_handler, data);
+    //解析客户端的请求，例如lxc-start主进程会收到客户端发送过来的链接请求，解析没问题然后调用
+    //lxc_cmd_process发送相应signal信号给lxc-start容器进程
+	ret = lxc_mainloop_add_handler(descr, connection, lxc_cmd_handler, data); 
 	if (ret) {
 		ERROR("failed to add handler");
 		goto out_close;
@@ -1009,6 +1021,7 @@ int lxc_cmd_init(const char *name, struct lxc_handler *handler,
 	return 0;
 }
 
+//这里面调用lxc_cmd_accept(lxc_cmd_handler)
 int lxc_cmd_mainloop_add(const char *name,
 			 struct lxc_epoll_descr *descr,
 			 struct lxc_handler *handler)

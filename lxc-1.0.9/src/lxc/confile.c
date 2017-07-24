@@ -119,7 +119,7 @@ static struct lxc_config_t config[] = {
 	{ "lxc.mount",                config_fstab                },
 	{ "lxc.rootfs.mount",         config_rootfs_mount         },
 	{ "lxc.rootfs.options",       config_rootfs_options       },
-	{ "lxc.rootfs",               config_rootfs               },
+	{ "lxc.rootfs",               config_rootfs               },  //存放文件系统rootfs的地方，必须有
 	{ "lxc.pivotdir",             config_pivotdir             },
 	{ "lxc.utsname",              config_utsname              },
 	{ "lxc.hook.pre-start",       config_hook                 },

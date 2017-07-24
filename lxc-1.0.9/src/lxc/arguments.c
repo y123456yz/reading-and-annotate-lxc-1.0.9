@@ -215,7 +215,7 @@ extern int lxc_arguments_parse(struct lxc_arguments *args,
 		case '?':	print_help(args, 1);
 		case 'h': 	print_help(args, 0);
 		default:
-			if (args->parser) { //后面这几个参数都会走到这里面
+			if (args->parser) { //-n  -o -l -q -P意外的参数都要走这里
 				ret = args->parser(args, c, optarg);
 				if (ret)
 					goto error;

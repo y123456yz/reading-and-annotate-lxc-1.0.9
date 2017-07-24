@@ -187,6 +187,10 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+    //./src/lxc/lxc-stop -n yyz-test  
+    //lxc-stop ................ 0, 0, 0, 0, 0
+    //printf("lxc-stop ................ %d, %d, %d, %d, %d\r\n", my_args.hardstop, my_args.nokill, my_args.nolock , my_args.nowait, my_args.reboot);
+    
 	if (my_args.nolock && !my_args.hardstop) {
 		fprintf(stderr, "--nolock may only be used with -k\n");
 		return 1;
@@ -203,12 +207,13 @@ int main(int argc, char *argv[])
 		goto out;
 	}
 
-	if (!c->may_control(c)) {
+	if (!c->may_control(c)) { //lxcapi_may_control
 		fprintf(stderr, "Insufficent privileges to control %s\n", c->name);
 		goto out;
 	}
 
-	if (!c->is_running(c)) {
+    //获取容器当前所处状态，状态码strstate
+	if (!c->is_running(c)) { //lxcapi_is_running
 		fprintf(stderr, "%s is not running\n", c->name);
 		/* Per our manpage we need to exit with exit code:
 		 * 2: The specified container exists but was not running.
@@ -229,15 +234,20 @@ int main(int argc, char *argv[])
 		goto out;
 	}
 
-	/* shutdown */
-	s = c->shutdown(c, my_args.timeout);
+	/* shutdown */ //lxcapi_shutdown
+	s = c->shutdown(c, my_args.timeout); //通知子进程容器shutdown关机
+	/*
+	printf("yang test ...........%d, %d, %d\r\n", (int)my_args.timeout, my_args.nokill, s);
+	./src/lxc/lxc-stop -n yyz-test
+    yang test ...........60, 0, 0
+    */
 	if (!s) {
 		if (my_args.timeout == 0)
 			ret = 0;
 		else if (my_args.nokill)
 			ret = 1;
 		else
-			ret = c->stop(c) ? 0 : 1;
+			ret = c->stop(c) ? 0 : 1; //lxcapi_stop
 	} else
 		ret = 0;
 

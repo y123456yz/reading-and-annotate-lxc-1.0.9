@@ -69,6 +69,16 @@ struct lxc_arguments {
 	/* for lxc-autostart */
 	int shutdown;
 
+    /*
+    Options :
+      -n, --name=NAME   NAME of the container
+      -r, --reboot      reboot the container
+      -W, --nowait      don't wait for shutdown or reboot to complete
+      -t, --timeout=T   wait T seconds before hard-stopping
+      -k, --kill        kill container rather than request clean shutdown
+          --nolock      Avoid using API locks
+          --nokill      Only request clean shutdown, don't force kill after timeout
+    */
 	/* for lxc-stop */
 	int hardstop;
 	int nokill;

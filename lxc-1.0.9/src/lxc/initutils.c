@@ -137,6 +137,13 @@ const char *lxc_global_config_value(const char *option_name)
 		user_cgroup_pattern = strdup(DEFAULT_CGROUP_PATTERN); //Ä¬ÈÏ²Î¿¼src/python-lxc/Makefile
 	}
 
+    /*
+    ........................... /usr/local/etc/lxc/lxc.conf  /usr/local/etc/lxc/default.conf  /usr/local/var/lib/lxc  /lxc/%n
+    ........................... /usr/local/etc/lxc/lxc.conf  /usr/local/etc/lxc/default.conf  /usr/local/var/lib/lxc  /lxc/%n
+    ........................... /usr/local/etc/lxc/lxc.conf  /usr/local/etc/lxc/default.conf  /usr/local/var/lib/lxc  /lxc/%n
+    ........................... /usr/local/etc/lxc/lxc.conf  /usr/local/etc/lxc/default.conf  /usr/local/var/lib/lxc  /lxc/%n
+	//printf("........................... %s  %s  %s  %s\r\n", user_config_path, user_default_config_path, user_lxc_path, user_cgroup_pattern);
+    */
 
 	const char * const (*ptr)[2];
 	size_t i;

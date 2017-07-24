@@ -32,12 +32,13 @@
 #define INT_TO_PTR(n) ((void *) (long) (n))
 #define PTR_TO_INT(p) ((int) (long) (p))
 
-typedef enum {
+//主进程在lxc_cmd_accept 通过epoll accept客户端请求，最终调用lxc_cmd_process获取客户端需要的信息返回返回
+typedef enum { //容器进程受到该信息后，在lxc_cmd_process做相应的处理
 	LXC_CMD_CONSOLE,
 	LXC_CMD_CONSOLE_WINCH,
 	LXC_CMD_STOP,
 	LXC_CMD_GET_STATE,
-	LXC_CMD_GET_INIT_PID,
+	LXC_CMD_GET_INIT_PID, //获取container /sbin/init进程的id号
 	LXC_CMD_GET_CLONE_FLAGS,
 	LXC_CMD_GET_CGROUP,
 	LXC_CMD_GET_CONFIG_ITEM,

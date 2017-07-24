@@ -114,8 +114,7 @@ struct lxc_container {
 	bool daemonize;
 
 	/*! Full path to configuration file */
-	char *config_path; //默认/usr/local/var/lib/lxc   configure的时候指定
-
+	char *config_path; //默认/usr/local/var/lib/lxc   -D参数指定配置
 
 
     /*
@@ -221,7 +220,7 @@ struct lxc_container {
 	 *
 	 * \return pid of init process as seen from outside the
 	 *  container.
-	 */
+	 */ //lxcapi_init_pid
 	pid_t (*init_pid)(struct lxc_container *c);
 
 	/*!
@@ -268,7 +267,7 @@ struct lxc_container {
 	 *
 	 * \return \c true on success, else \c false.
 	 */
-	bool (*stop)(struct lxc_container *c);
+	bool (*stop)(struct lxc_container *c); //lxcapi_stop
 
 	/*!
 	 * \brief Change whether the container wants to run disconnected
@@ -420,7 +419,7 @@ struct lxc_container {
 	 *  (-1 to wait forever, 0 to avoid waiting).
 	 *
 	 * \return \c true if the container was shutdown successfully, else \c false.
-	 */
+	 */ //lxcapi_shutdown
 	bool (*shutdown)(struct lxc_container *c, int timeout);
 
 	/*!
@@ -769,7 +768,7 @@ struct lxc_container {
 	 *  container monitor and the caller may not access it, otherwise
 	 * returns \c true.
 	 */
-	bool (*may_control)(struct lxc_container *c);
+	bool (*may_control)(struct lxc_container *c); //lxcapi_may_control
 
 	/*!
 	 * \brief Add specified device to the container.

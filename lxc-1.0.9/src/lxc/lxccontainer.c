@@ -328,6 +328,7 @@ out:
 	return ret;
 }
 
+//获取容器当前所处状态，状态码strstate
 static const char *lxcapi_state(struct lxc_container *c)
 {
 	lxc_state_t s;
@@ -345,6 +346,7 @@ static bool is_stopped(struct lxc_container *c)
 	return (s == STOPPED);
 }
 
+//获取容器当前所处状态，状态码strstate
 static bool lxcapi_is_running(struct lxc_container *c)
 {
 	const char *s;
@@ -482,6 +484,7 @@ static bool lxcapi_want_close_all_fds(struct lxc_container *c, bool state)
 	return true;
 }
 
+//lxcapi_shutdown中会执行该函数
 static bool lxcapi_wait(struct lxc_container *c, const char *state, int timeout)
 {
 	int ret;
@@ -1366,23 +1369,30 @@ static bool lxcapi_reboot(struct lxc_container *c)
 
 }
 
+//向容器所在子进程发送信号，等待超时lxc-stop自己退出
 static bool lxcapi_shutdown(struct lxc_container *c, int timeout)
 {
 	bool retv;
 	pid_t pid;
-	int haltsignal = SIGPWR;
+	//发送SIGPWR通知容器shutdown关机
+	int haltsignal = SIGPWR; //# send SIGPWR to container to trigger a shutdown (see lxc-shutdown(1))
 
 	if (!c)
 		return false;
 
 	if (!c->is_running(c))
 		return true;
-	pid = c->init_pid(c);
+		
+	pid = c->init_pid(c); //lxcapi_init_pid  获取子进程号，也就是启动容器的子进程号
 	if (pid <= 0)
 		return true;
+		
 	if (c->lxc_conf && c->lxc_conf->haltsignal)
 		haltsignal = c->lxc_conf->haltsignal;
-	kill(pid, haltsignal);
+		
+	kill(pid, haltsignal); //网络时间处理，signale信号处理都在这里signal_handler
+
+	//lxcapi_wait
 	retv = c->wait(c, "STOPPED", timeout);
 	return retv;
 }
@@ -3157,6 +3167,8 @@ err:
 
 static bool lxcapi_may_control(struct lxc_container *c)
 {
+    // ...............yyz-test, /usr/local/var/lib/lxc
+    printf(" ...............%s, %s\r\n", c->name, c->config_path);
 	return lxc_try_cmd(c->name, c->config_path) == 0;
 }
 

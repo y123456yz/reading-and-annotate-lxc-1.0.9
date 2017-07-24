@@ -68,7 +68,7 @@ extern const struct ns_info ns_info[LXC_NS_MAX];
 
 //初始化赋值见lxc_init
 struct lxc_handler {
-	pid_t pid;
+	pid_t pid; //lxc_clone返回值，见lxc_spawn，也就是子进程pid
 	char *name; //容器名
 	lxc_state_t state; //STARTING 等
 	int clone_flags; //CLONE_NEWUTS等，或
@@ -77,11 +77,12 @@ struct lxc_handler {
 	struct lxc_conf *conf;
 	struct lxc_operations *ops;
 	void *data;
-	int sv[2]; //初始化见lxc_sync_init
+	//lxc父进程和lxc_clone创建的子进程通过该sv 管道通信
+	int sv[2]; //初始化见lxc_sync_init //父进程给lxc_clone创建的clone的子进程发送LXC_SYNC_STARTUP信息，子进程受到后会回送LXC_SYNC_STARTUP
 	int pinfd;
-	const char *lxcpath; //config_path 赋值见lxc_init
+	const char *lxcpath; //config_path 赋值见lxc_init  默认/usr/local/var/lib/lxc  -P参数修改
 	void *cgroup_data; //赋值见cgroup_init  类型为cgfs_data
-	int nsfd[LXC_NS_MAX];
+	int nsfd[LXC_NS_MAX]; //获取lxc_clone创建的进程中的各种ns中的文件fd   见lxc_spawn
 };
 
 extern struct lxc_handler *lxc_init(const char *name, struct lxc_conf *, const char *);

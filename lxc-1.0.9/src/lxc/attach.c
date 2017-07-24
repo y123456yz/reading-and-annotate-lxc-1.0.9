@@ -849,7 +849,7 @@ int lxc_attach(const char* name, const char* lxcpath, lxc_attach_exec_t exec_fun
 		return -1;
 	}
 
-	if (pid) {
+	if (pid) { //Ö÷½ø³Ì
 		int procfd = -1;
 		pid_t to_cleanup_pid = pid;
 
