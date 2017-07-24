@@ -105,15 +105,18 @@ int fuse_loop_mt_proc(struct fuse *f, fuse_processor_t proc, void *data)
 	return res;
 }
 
+//主线程循环处理
 int fuse_loop_mt(struct fuse *f)
 {
 	if (f == NULL)
 		return -1;
 
+    //node定期删除清理线程
 	int res = fuse_start_cleanup_thread(f);
 	if (res)
 		return -1;
 
+    //工作线程处理
 	res = fuse_session_loop_mt(fuse_get_session(f));
 	fuse_stop_cleanup_thread(f);
 	return res;

@@ -73,7 +73,7 @@ extern "C" {
  * If the format is "%s", memory is allocated for the string unlike
  * with scanf().
  */
-struct fuse_opt {
+struct fuse_opt { //fuse_opt_context.opt    赋值见FUSE_OPT_KEY  FUSE_HELPER_OPT
 	/** Matching template and optional parameter formatting */
 	const char *templ;
 
@@ -93,7 +93,7 @@ struct fuse_opt {
 /**
  * Key option.	In case of a match, the processing function will be
  * called with the specified key.
- */
+ */ //对fuse_opt进行赋值
 #define FUSE_OPT_KEY(templ, key) { templ, -1U, key }
 
 /**

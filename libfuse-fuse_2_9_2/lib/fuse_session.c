@@ -17,7 +17,7 @@
 #include <assert.h>
 #include <errno.h>
 
-struct fuse_chan {
+struct fuse_chan { //初始化赋值见fuse_chan_new_common
 	struct fuse_chan_ops op;
 
 	struct fuse_session *se;

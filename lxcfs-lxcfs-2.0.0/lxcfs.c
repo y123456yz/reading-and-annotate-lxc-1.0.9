@@ -171,6 +171,7 @@ static int do_proc_read(const char *path, char *buf, size_t size, off_t offset,
 	char *error;
 
 	dlerror();    /* Clear any existing error */
+	//执行bingdings.c中的proc_read
 	proc_read = (int (*)(const char *, char *, size_t, off_t, struct fuse_file_info *)) dlsym(dlopen_handle, "proc_read");
 	error = dlerror();
 	if (error != NULL) {
@@ -488,6 +489,7 @@ static int lxcfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, of
 static int lxcfs_access(const char *path, int mode)
 {
 	int ret;
+	printf(" ...........lxcfs_access........ path:%s\r\n", path);
 	if (strncmp(path, "/cgroup", 7) == 0) {
 		up_users();
 		ret = do_cg_access(path, mode);
@@ -520,15 +522,19 @@ static int lxcfs_releasedir(const char *path, struct fuse_file_info *fi)
 	return -EINVAL;
 }
 
+//ls cat等相关命令必须跟上这两个参数，实际上/usr/local/var/lib/lxcfs/中的
 static int lxcfs_open(const char *path, struct fuse_file_info *fi)
 {
 	int ret;
+
+	printf(" ...........lxcfs_open........ path:%s\r\n", path);
 	if (strncmp(path, "/cgroup", 7) == 0) {
 		up_users();
 		ret = do_cg_open(path, fi);
 		down_users();
 		return ret;
 	}
+	
 	if (strncmp(path, "/proc", 5) == 0) {
 		up_users();
 		ret = do_proc_open(path, fi);
@@ -542,6 +548,7 @@ static int lxcfs_open(const char *path, struct fuse_file_info *fi)
 static int lxcfs_read(const char *path, char *buf, size_t size, off_t offset,
 		struct fuse_file_info *fi)
 {
+    printf(" .................lxcfs_read.. path:%s\r\n", path);
 	int ret;
 	if (strncmp(path, "/cgroup", 7) == 0) {
 		up_users();
@@ -963,13 +970,33 @@ static int set_pidfile(char *pidfile)
 }
 
 /*
+
+ LXCFS主进程
+
+LXCFS实现的main函数非常简单。在其main函数中可以看到，运行lxcfs时，首先会通过cgfs_setup_controllers入口函数进行初始化,大致步骤：
+
+创建运行时工作目录/run/lxcfs/controllers/
+将tmpfs文件系统挂载在/run/lxcfs/controllers/
+检查当前系统已挂载的所有cgroup子系统
+
+将当前系统各个cgroup子系统重新挂载在/run/lxcfs/controllers/目录下然后调用libfuse库主函数fuse_main，
+指定一个用户态文件系统挂载的目标目录(例如:/var/lib/lxcfs/)，并传递如下参数:
+
 -s is required to turn off multi-threading as libnih-dbus isn't thread safe.
-
 -f is to keep lxcfs running in the foreground
-
 -o allow_other is required to have non-root user be able to access the filesystem
 */
+
+/*
+[root@localhost lib]# ls /usr/local/var/lib/lxcfs/cgroup/
+blkio/            cpuacct,cpu/      cpuset/           devices/          freezer/          hugetlb/          memory/           name=systemd/     net_prio,net_cls/ perf_event/       pids/             
+[root@localhost lib]# ls /usr/local/var/lib/lxcfs/proc/
+cpuinfo    diskstats  meminfo    stat       swaps      uptime    //主要是容器读取改容器自己的这些信息   
+[root@localhost lib]# ls /usr/local/var/lib/lxcfs/proc/
+*/
+
 //参考http://way.xiaojukeji.com/article/4661
+//http://blog.sae.sina.com.cn/archives/2308
 int main(int argc, char *argv[])
 {
 	int ret = -1, pidfd;
@@ -1028,6 +1055,7 @@ int main(int argc, char *argv[])
 	if ((pidfd = set_pidfile(pidfile)) < 0)
 		goto out;
 
+  
 	ret = fuse_main(nargs, newargv, &lxcfs_ops, NULL);
 
 	dlclose(dlopen_handle);

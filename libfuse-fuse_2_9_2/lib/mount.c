@@ -62,10 +62,26 @@ enum {
 	KEY_VERSION,
 };
 
-struct mount_opts {
+//mount相关的参数解析见fuse_kern_mount
+struct mount_opts { //赋值见fuse_mount_opt_proc
 	int allow_other;
 	int allow_root;
 	int ishelp;
+	/*
+    Mount.c (libfuse-fuse_2_9_2\lib):   FUSE_OPT_KEY("ro",          KEY_KERN_FLAG),
+    Mount.c (libfuse-fuse_2_9_2\lib):   FUSE_OPT_KEY("rw",          KEY_KERN_FLAG),
+    Mount.c (libfuse-fuse_2_9_2\lib):   FUSE_OPT_KEY("suid",            KEY_KERN_FLAG),
+    Mount.c (libfuse-fuse_2_9_2\lib):   FUSE_OPT_KEY("nosuid",          KEY_KERN_FLAG),
+    Mount.c (libfuse-fuse_2_9_2\lib):   FUSE_OPT_KEY("dev",         KEY_KERN_FLAG),
+    Mount.c (libfuse-fuse_2_9_2\lib):   FUSE_OPT_KEY("nodev",           KEY_KERN_FLAG),
+    Mount.c (libfuse-fuse_2_9_2\lib):   FUSE_OPT_KEY("exec",            KEY_KERN_FLAG),
+    Mount.c (libfuse-fuse_2_9_2\lib):   FUSE_OPT_KEY("noexec",          KEY_KERN_FLAG),
+    Mount.c (libfuse-fuse_2_9_2\lib):   FUSE_OPT_KEY("async",           KEY_KERN_FLAG),
+    Mount.c (libfuse-fuse_2_9_2\lib):   FUSE_OPT_KEY("sync",            KEY_KERN_FLAG),
+    Mount.c (libfuse-fuse_2_9_2\lib):   FUSE_OPT_KEY("dirsync",         KEY_KERN_FLAG),
+    Mount.c (libfuse-fuse_2_9_2\lib):   FUSE_OPT_KEY("atime",           KEY_KERN_FLAG),
+    Mount.c (libfuse-fuse_2_9_2\lib):   FUSE_OPT_KEY("noatime",         KEY_KERN_FLAG),
+	*/
 	int flags;
 	int nonempty;
 	int auto_unmount;
@@ -75,7 +91,7 @@ struct mount_opts {
 	char *subtype_opt;
 	char *mtab_opts;
 	char *fusermount_opts;
-	char *kernel_opts;
+	char *kernel_opts; //赋值见fuse_mount_opt_proc
 };
 
 #define FUSE_MOUNT_OPT(t, p) { t, offsetof(struct mount_opts, p), 1 }
@@ -202,6 +218,15 @@ static int fuse_mount_opt_proc(void *data, const char *arg, int key,
 {
 	struct mount_opts *mo = data;
 
+    /*  配合fuse_mount_opts
+    ..............key:1, arg:allow_other
+    ..............key:-1, arg:direct_io
+    ..............key:-1, arg:entry_timeout=0.5
+    ..............key:-1, arg:attr_timeout=0.5
+    ..............key:3, arg:subtype=lt-lxcfs
+
+    printf("..............key:%d, arg:%s\r\n", key, arg);
+    */
 	switch (key) {
 	case KEY_ALLOW_ROOT:
 		if (fuse_opt_add_opt(&mo->kernel_opts, "allow_other") == -1 ||
@@ -417,6 +442,8 @@ int fuse_mount_compat22(const char *mountpoint, const char *opts)
 	return fuse_mount_fusermount(mountpoint, &mo, opts, 0);
 }
 
+//.......  lt-lxcfs, /usr/local/var/lib/lxcfs, fuse.lt-lxcfs ,6, allow_other,fd=4,rootmode=40000,user_id=0,group_id=0
+//lt-lxcfs, /usr/local/var/lib/lxcfs, fuse.lt-lxcfs
 static int fuse_mount_sys(const char *mnt, struct mount_opts *mo,
 			  const char *mnt_opts)
 {
@@ -487,8 +514,10 @@ static int fuse_mount_sys(const char *mnt, struct mount_opts *mo,
 	}
 	strcpy(source,
 	       mo->fsname ? mo->fsname : (mo->subtype ? mo->subtype : devname));
-
+    
 	res = mount(source, mnt, type, mo->flags, mo->kernel_opts);
+	//.......  lt-lxcfs, /usr/local/var/lib/lxcfs, fuse.lt-lxcfs ,6, allow_other,fd=4,rootmode=40000,user_id=0,group_id=0
+	//printf(".......  %s, %s, %s ,%d, %s\r\n", source, mnt, type, mo->flags, mo->kernel_opts);
 	if (res == -1 && errno == ENODEV && mo->subtype) {
 		/* Probably missing subtype support */
 		strcpy(type, mo->blkdev ? "fuseblk" : "fuse");
@@ -530,6 +559,8 @@ static int fuse_mount_sys(const char *mnt, struct mount_opts *mo,
 		if (!newmnt)
 			goto out_umount;
 
+        //lt-lxcfs, /usr/local/var/lib/lxcfs, fuse.lt-lxcfs
+        //printf(".......... %s, %s, %s\r\n", source, newmnt, type);
 		res = fuse_mnt_add_mount("fuse", source, newmnt, type,
 					 mnt_opts);
 		free(newmnt);
@@ -567,6 +598,8 @@ static int get_mnt_flag_opts(char **mnt_optsp, int flags)
 	return 0;
 }
 
+//.......  lt-lxcfs, /usr/local/var/lib/lxcfs, fuse.lt-lxcfs ,6, allow_other,fd=4,rootmode=40000,user_id=0,group_id=0
+//lt-lxcfs, /usr/local/var/lib/lxcfs, fuse.lt-lxcfs
 int fuse_kern_mount(const char *mountpoint, struct fuse_args *args)
 {
 	struct mount_opts mo;
@@ -576,6 +609,18 @@ int fuse_kern_mount(const char *mountpoint, struct fuse_args *args)
 	memset(&mo, 0, sizeof(mo));
 	mo.flags = MS_NOSUID | MS_NODEV;
 
+    //..................... mountpoint:/usr/local/var/lib/lxcfs
+    //printf("..................... mountpoint:%s\r\n", mountpoint);
+    /*
+    ................../root/git/reading-and-annotate-lxc-1.0.9/lxcfs-lxcfs-2.0.0/.libs/lt-lxcfs
+    ..................-o
+    ..................allow_other,direct_io,entry_timeout=0.5,attr_timeout=0.5
+    ..................-osubtype=lt-lxcfs
+    int i = 0;
+    for(i = 0; i < args->argc; i++) 
+        printf("..................%s\r\n", args->argv[i]);
+    */
+    
 	if (args &&
 	    fuse_opt_parse(args, &mo, fuse_mount_opts, fuse_mount_opt_proc) == -1)
 		return -1;

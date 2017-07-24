@@ -35,29 +35,17 @@ lxc.utsname = yyztest1
 #lxc.cap.drop = sys_rawio
 #lxc.cap.drop = sys_time
 
-<<<<<<< HEAD
 lxc.hook.clone = /root/yyzdir/clonehostname
-=======
-lxc.hook.clone = ./yyzdir/clonehostname
->>>>>>> 33f87d79b9d78b5e28783f62034afc77a0b9814d
 lxc.cgroup.memory.limit_in_bytes = 512M
 #lxc.cgroup.memory.memsw.limit_in_bytes = 1G
 lxc.cgroup.cpuset.cpus = 0
 #lxc.include = /root/yyzdir/common.conf.d/00-lxcfs.conf
 #lxc.mount.entry = /data11 data11 none rw,bind 0 0
 #lxc.rootfs = /home/xiaoju/lxc/6f2cd8ad5eed4cac93b4f5b5c0b55af5/root
-<<<<<<< HEAD
 lxc.rootfs = /root/yyzdir/rootfs
-=======
-lxc.rootfs = /usr/local/lib/lxc/rootfs
->>>>>>> 33f87d79b9d78b5e28783f62034afc77a0b9814d
+#lxc.rootfs = /usr/local/lib/lxc/rootfs
 lxc.network.type = veth
 lxc.network.flags = up
 lxc.network.link = virbr0
 lxc.network.ipv4 = 172.23.133.33/24
 lxc.network.ipv4.gateway = 172.23.133.1
-<<<<<<< HEAD
-lxc.network.name = xxccc
-=======
-
->>>>>>> 33f87d79b9d78b5e28783f62034afc77a0b9814d

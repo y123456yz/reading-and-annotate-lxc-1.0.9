@@ -133,8 +133,8 @@ struct node_slab {
 	int used;
 };
 
-struct fuse {
-	struct fuse_session *se;
+struct fuse { //初始化赋值见fuse_new_common
+	struct fuse_session *se; //fuse_lowlevel_new_common
 	struct node_table name_table;
 	struct node_table id_table;
 	struct list_head lru_table;
@@ -4555,6 +4555,7 @@ static int node_table_init(struct node_table *t)
 	return 0;
 }
 
+//node定期删除清理
 static void *fuse_prune_nodes(void *fuse)
 {
 	struct fuse *f = fuse;
@@ -4567,8 +4568,10 @@ static void *fuse_prune_nodes(void *fuse)
 	return NULL;
 }
 
+//node定期删除清理
 int fuse_start_cleanup_thread(struct fuse *f)
-{
+{   
+    //printf("........fuse_start_cleanup_thread........... %d\r\n", f->conf.remember);
 	if (lru_enabled(f))
 		return fuse_start_thread(&f->prune_thread, fuse_prune_nodes, f);
 

@@ -236,6 +236,8 @@ int main(int argc, char *argv[])
 
 	const char *lxcpath = my_args.lxcpath[0]; //默认/usr/local/var/lib/lxc
 
+    DEBUG(" .................%s", lxcpath); //可以通过-P参数指定 mount path root
+    
 	/*
 	 * rcfile possibilities:
 	 * 1. rcfile from random path specified in cli option

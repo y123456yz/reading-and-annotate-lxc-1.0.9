@@ -398,6 +398,8 @@ static int dir_mount(struct bdev *bdev)
 		return -22;
 	}
 
+    //yang test ........ /root/yyzdir/rootfs  /usr/local/lib/lxc/rootfs  (null)
+    //printf("yang test ........ %s  %s  %s\r\n", bdev->src, bdev->dest, mntdata);
 	ret = mount(bdev->src, bdev->dest, "bind", MS_BIND | MS_REC | mntflags, mntdata);
 	free(mntdata);
 	return ret;

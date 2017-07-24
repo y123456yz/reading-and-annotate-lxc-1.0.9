@@ -220,8 +220,21 @@ struct lxc_console {
  * @rootfs     : a path to the rootfs
  * @pivot_root : a path to a pivot_root location to be used
  */ //把path rootfs->path 挂载到rootfs->mount	
+
+/*
+[root@localhost rootfs]# pwd
+/usr/local/lib/lxc/rootfs
+[root@localhost rootfs]# ls
+bin  dev  etc  fstab  lib  lib64  proc  sbin  sys  usr  var
+[root@localhost rootfs]# 
+[root@localhost rootfs]# ls /root/yyzdir/
+clonehostname   common.conf.d/  common.seccomp  rootfs/         rootfs.tar.gz   
+[root@localhost rootfs]# ls /root/yyzdir/rootfs
+bin  boot  cccccc  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  selinux  srv  sys  test----  test--1  tmp  usr  var
+[root@localhost rootfs]# 
+*/
 struct lxc_rootfs { //把path mount到mount(lxc.rootfs配置位置),见setup_rootfs
-    char *path; //lxc.rootfs配置  DEBUG("mounted '%s' on '%s'", rootfs->path, rootfs->mount);
+    char *path; //lxc.rootfs配置  DEBUG("mounted '%s' on '%s'", rootfs->path, rootfs->mount);  path中创建的东西或者在容器中创建的东西，容器和主机相互可见
     //在setup_rootfs_pivot_root中指定子进程跟目录为setup_rootfs_pivot_root
 	char *mount; //默认值default_rootfs_mount  ./configure --with-rootfs-path=/lxc/rootfs/ 设置  挂载点
 	char *pivot;

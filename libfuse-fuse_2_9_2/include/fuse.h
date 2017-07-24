@@ -85,7 +85,7 @@ typedef int (*fuse_dirfil_t) (fuse_dirh_t h, const char *name, int type,
  * See http://fuse.sourceforge.net/wiki/ for more information.  There
  * is also a snapshot of the relevant wiki pages in the doc/ folder.
  */
-struct fuse_operations {
+struct fuse_operations { //lxcfs_ops
 	/** Get file attributes.
 	 *
 	 * Similar to stat().  The 'st_dev' and 'st_blksize' fields are

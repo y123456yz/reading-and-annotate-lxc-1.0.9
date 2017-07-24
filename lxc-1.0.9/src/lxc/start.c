@@ -325,7 +325,7 @@ static int signal_handler(int fd, uint32_t events, void *data,
 	 * by a process different from the container init
 	 */
 	if (siginfo.ssi_pid != *pid) {
-		WARN("invalid pid for SIGCHLD");
+		WARN("invalid pid for SIGCHLD 111111");
 		return init_died ? 1 : 0;
 	}
 
@@ -416,7 +416,7 @@ struct lxc_handler *lxc_init(const char *name, struct lxc_conf *conf, const char
 		goto out_free;
 	}
 
-	if (lxc_cmd_init(name, handler, lxcpath)) //内部链接用的域套接字
+	if (lxc_cmd_init(name, handler, lxcpath))  
 		goto out_free_name;
 
 	if (lxc_read_seccomp_config(conf) != 0) {
@@ -779,8 +779,6 @@ static int do_start(void *data)
 		lsm_label = handler->conf->lsm_se_context;
 	if (lsm_process_label_set(lsm_label, 1, 1) < 0)
 		goto out_warn_father;
-    printf("yang test 4444444444444444\r\n");
-
 
 	/* Some init's such as busybox will set sane tty settings on stdin,
 	 * stdout, stderr which it thinks is the console. We already set them
@@ -793,7 +791,6 @@ static int do_start(void *data)
 
 	/* If we mounted a temporary proc, then unmount it now */
 	tmp_proc_unmount(handler->conf);
-    printf("yang test 5555555555555555\r\n");
 
 	if (lxc_seccomp_load(handler->conf) != 0) //seccomp配置相关
 		goto out_warn_father;
@@ -802,7 +799,6 @@ static int do_start(void *data)
 		ERROR("failed to run start hooks for container '%s'.", handler->name);
 		goto out_warn_father;
 	}
-    printf("yang test 66666666666666666666666\r\n");
 
 	/* The clearenv() and putenv() calls have been moved here
 	 * to allow us to use environment variables passed to the various
@@ -950,7 +946,6 @@ static int lxc_spawn(struct lxc_handler *handler)
 
 	cgroups_connected = true;
 
-    
     //创建/sys/fs/cgroup/cpuacct/lxc/  /sys/fs/cgroup/cpuacct/lxc/yyz-test 及其他cgroup mount挂载点下面的lxc  lxc/yyz-test目录
 	if (!cgroup_create(handler)) {
 		ERROR("failed creating cgroups");
@@ -994,7 +989,7 @@ static int lxc_spawn(struct lxc_handler *handler)
 	flags = handler->clone_flags;
 	if (handler->clone_flags & CLONE_NEWUSER)
 		flags &= ~CLONE_NEWNET;
-
+    
 	handler->pid = lxc_clone(do_start, handler, handler->clone_flags);
 	if (handler->pid < 0) {
 		SYSERROR("failed to fork into a new namespace");

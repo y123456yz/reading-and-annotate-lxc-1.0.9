@@ -15,9 +15,9 @@
 #include <assert.h>
 
 struct fuse_opt_context {
-	void *data;
-	const struct fuse_opt *opt;
-	fuse_opt_proc_t proc;
+	void *data;//赋值见fuse_opt_parse
+	const struct fuse_opt *opt; //赋值见fuse_opt_parse   例如fuse_helper_opts   fuse_mount_opts
+	fuse_opt_proc_t proc;//赋值见fuse_opt_parse   例如fuse_helper_opt_proc      fuse_mount_opt_proc
 	int argctr;
 	int argc;
 	char **argv;
@@ -274,6 +274,27 @@ static int process_opt_sep_arg(struct fuse_opt_context *ctx,
 static int process_gopt(struct fuse_opt_context *ctx, const char *arg, int iso)
 {
 	unsigned sep;
+
+    /*
+     ........... arg:-f
+     ........... arg:allow_other
+     ........... arg:direct_io
+     ........... arg:entry_timeout=0.5
+     ........... arg:attr_timeout=0.5
+
+    
+     ........... arg:allow_other
+     ........... arg:direct_io
+     ........... arg:entry_timeout=0.5
+     ........... arg:attr_timeout=0.5
+     ........... arg:subtype=lt-lxcfs
+
+    
+     ........... arg:direct_io
+     ........... arg:entry_timeout=0.5
+     ........... arg:attr_timeout=0.5
+	printf(" ........... arg:%s\r\n", arg);
+	*/
 	const struct fuse_opt *opt = find_opt(ctx->opt, arg, &sep);
 	if (opt) {
 		for (; opt; opt = find_opt(opt + 1, arg, &sep)) {
@@ -370,11 +391,36 @@ static int process_one(struct fuse_opt_context *ctx, const char *arg)
 
 static int opt_parse(struct fuse_opt_context *ctx)
 {
+    int i = 0;
+
+    /*
+    ............. arv:/root/git/reading-and-annotate-lxc-1.0.9/lxcfs-lxcfs-2.0.0/.libs/lt-lxcfs
+    ............. arv:-f
+    ............. arv:-o
+    ............. arv:allow_other,direct_io,entry_timeout=0.5,attr_timeout=0.5
+    ............. arv:/usr/local/var/lib/lxcfs/
+
+    另一次
+    ............. arv:/root/git/reading-and-annotate-lxc-1.0.9/lxcfs-lxcfs-2.0.0/.libs/lt-lxcfs
+    ............. arv:-o
+    ............. arv:allow_other,direct_io,entry_timeout=0.5,attr_timeout=0.5
+    ............. arv:-osubtype=lt-lxcfs
+    ............. arv:/root/git/reading-and-annotate-lxc-1.0.9/lxcfs-lxcfs-2.0.0/.libs/lt-lxcfs
+    ............. arv:-o
+    ............. arv:direct_io,entry_timeout=0.5,attr_timeout=0.5
+    ............. arv:/root/git/reading-and-annotate-lxc-1.0.9/lxcfs-lxcfs-2.0.0/.libs/lt-lxcfs
+    
+    for(i = 0; i < ctx->argc; i++) {
+        printf("............. arv:%s\r\n", ctx->argv[i]);
+    }
+    */
+    
 	if (ctx->argc) {
 		if (add_arg(ctx, ctx->argv[0]) == -1)
 			return -1;
 	}
 
+    //printf("................ %d, %d, %d, %d\r\n", ctx->argctr, ctx->argc, ctx->nonopt, ctx->outargs.argc);
 	for (ctx->argctr = 1; ctx->argctr < ctx->argc; ctx->argctr++)
 		if (process_one(ctx, ctx->argv[ctx->argctr]) == -1)
 			return -1;
@@ -395,6 +441,7 @@ static int opt_parse(struct fuse_opt_context *ctx)
 	return 0;
 }
 
+//根据args查找opts，然后执行回调proc
 int fuse_opt_parse(struct fuse_args *args, void *data,
 		   const struct fuse_opt opts[], fuse_opt_proc_t proc)
 {

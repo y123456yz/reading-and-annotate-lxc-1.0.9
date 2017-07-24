@@ -1698,7 +1698,7 @@ int fuse_session_loop_mt(struct fuse_session *se);
  *
  * This is used in channel creation
  */
-struct fuse_chan_ops {
+struct fuse_chan_ops { //ÀýÈç²Î¿¼fuse_kern_chan_new
 	/**
 	 * Hook for receiving a raw request
 	 *

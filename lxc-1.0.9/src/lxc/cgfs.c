@@ -2564,7 +2564,6 @@ static void *cgfs_init(const char *name)
 		goto err1;
 
 	d->cgroup_pattern = lxc_global_config_value("lxc.cgroup.pattern");
-    printf("yang test .xxxxxxxxxxxxxxxxxxxxxxxxxx..d->cgroup_pattern:%s,  eid:%d\r\n", d->cgroup_pattern, geteuid()); ///lxc/%n,  eid:0
     
 	d->meta = lxc_cgroup_load_meta();
 	if (!d->meta) {

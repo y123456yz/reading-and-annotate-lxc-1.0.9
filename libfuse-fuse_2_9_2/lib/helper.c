@@ -28,15 +28,16 @@ enum  {
 	KEY_VERSION,
 };
 
-struct helper_opts {
-	int singlethread;
-	int foreground;
-	int nodefault_subtype;
-	char *mountpoint;
+struct helper_opts { //参考fuse_parse_cmdline
+	int singlethread;//解析命令行参数，例如解析到-s，则singlethread值1
+	int foreground;//解析命令行参数，例如解析到-d  debug -f，则foreground值1
+	int nodefault_subtype;//解析命令行参数，例如解析到fsname=  subtype=，则nodefault_subtype值1
+	char *mountpoint; 
 };
 
 #define FUSE_HELPER_OPT(t, p) { t, offsetof(struct helper_opts, p), 1 }
 
+//解析命令行参数，例如解析到-d  debug -f，则foreground值1
 static const struct fuse_opt fuse_helper_opts[] = {
 	FUSE_HELPER_OPT("-d",		foreground),
 	FUSE_HELPER_OPT("debug",	foreground),
@@ -85,11 +86,26 @@ static void helper_version(void)
 	fprintf(stderr, "FUSE library version: %s\n", PACKAGE_VERSION);
 }
 
+/*
+enum  {
+	KEY_HELP,
+	KEY_HELP_NOHEADER,
+	KEY_VERSION,
+};
+*/
 static int fuse_helper_opt_proc(void *data, const char *arg, int key,
 				struct fuse_args *outargs)
 {
 	struct helper_opts *hopts = data;
 
+    /*
+    yang test ................key:-1
+    yang test ................key:-1
+    yang test ................key:-1
+    yang test ................key:-1
+    yang test ................key:-2
+    printf("yang test ................key:%d\r\n", key);
+    */
 	switch (key) {
 	case KEY_HELP:
 		usage(outargs->argv[0]);
@@ -260,6 +276,7 @@ void fuse_unmount(const char *mountpoint, struct fuse_chan *ch)
 	fuse_unmount_common(mountpoint, ch);
 }
 
+//fuse mount及空间初始化
 struct fuse *fuse_setup_common(int argc, char *argv[],
 			       const struct fuse_operations *op,
 			       size_t op_size,
@@ -275,15 +292,21 @@ struct fuse *fuse_setup_common(int argc, char *argv[],
 	int foreground;
 	int res;
 
+    //解析命令行
 	res = fuse_parse_cmdline(&args, mountpoint, multithreaded, &foreground);
 	if (res == -1)
 		return NULL;
+
 
 	ch = fuse_mount_common(*mountpoint, &args);
 	if (!ch) {
 		fuse_opt_free_args(&args);
 		goto err_free;
 	}
+
+//  printf("3333333333333333333333\r\n");  
+//上次执行这里while，杀掉LXCFS后，再次启动，会报错
+//	while(1); fuse: bad mount point `/usr/local/var/lib/lxcfs/': Transport endpoint is not connected
 
 	fuse = fuse_new_common(ch, &args, op, op_size, user_data, compat);
 	fuse_opt_free_args(&args);
@@ -349,6 +372,7 @@ static int fuse_main_common(int argc, char *argv[],
 	if (fuse == NULL)
 		return 1;
 
+    //while(1); ls /usr/local/var/lib/lxcf  的时候就会卡死  这也说明了/usr/local/var/lib/lxcfs中的内容是由lxcfs获取触发到的，而不是由mount得到
 	if (multithreaded)
 		res = fuse_loop_mt(fuse);
 	else
@@ -467,6 +491,10 @@ void fuse_teardown_compat22(struct fuse *fuse, int fd, char *mountpoint)
 	fuse_teardown_common(fuse, mountpoint);
 }
 
+//参考http://blog.csdn.net/skdkjzz/article/details/41869127 http://blog.sae.sina.com.cn/archives/2308
+
+//.......  lt-lxcfs, /usr/local/var/lib/lxcfs, fuse.lt-lxcfs ,6, allow_other,fd=4,rootmode=40000,user_id=0,group_id=0
+//lt-lxcfs, /usr/local/var/lib/lxcfs, fuse.lt-lxcfs
 int fuse_mount_compat25(const char *mountpoint, struct fuse_args *args)
 {
 	return fuse_kern_mount(mountpoint, args);
@@ -476,3 +504,4 @@ FUSE_SYMVER(".symver fuse_setup_compat25,fuse_setup@FUSE_2.5");
 FUSE_SYMVER(".symver fuse_teardown_compat22,fuse_teardown@FUSE_2.2");
 FUSE_SYMVER(".symver fuse_main_real_compat25,fuse_main_real@FUSE_2.5");
 FUSE_SYMVER(".symver fuse_mount_compat25,fuse_mount@FUSE_2.5");
+

@@ -142,6 +142,7 @@ static void *fuse_do_work(void *data)
 	return NULL;
 }
 
+//创建线程
 int fuse_start_thread(pthread_t *thread_id, void *(*func)(void *), void *arg)
 {
 	sigset_t oldset;
@@ -175,6 +176,7 @@ int fuse_start_thread(pthread_t *thread_id, void *(*func)(void *), void *arg)
 	return 0;
 }
 
+//工作线程
 static int fuse_loop_start_thread(struct fuse_mt *mt)
 {
 	int res;

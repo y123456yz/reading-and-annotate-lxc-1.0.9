@@ -556,6 +556,7 @@ static int mount_rootfs_dir(const char *rootfs, const char *target,
 
     //MS_BIND：执行bind挂载，使文件或者子目录树在文件系统内的另一个点上可视。 
 	ret = mount(rootfs, target, "none", MS_BIND | MS_REC | mntflags, mntdata);
+	DEBUG("yang test ........... %s %s %s", rootfs, target, mntdata);
 	free(mntdata);
 
 	return ret;
@@ -866,7 +867,7 @@ static int mount_rootfs(const char *rootfs, const char *target, const char *opti
 	char absrootfs[MAXPATHLEN];
 	struct stat s;
 	int i;
-
+    printf("11111111111111111111111111111\r\n");
 	typedef int (*rootfs_cb)(const char *, const char *, const char *);
 
 	struct rootfs_type {
@@ -893,6 +894,7 @@ static int mount_rootfs(const char *rootfs, const char *target, const char *opti
 		return -1;
 	}
 
+    DEBUG("......................... %s, %s", absrootfs, target);
 	for (i = 0; i < sizeof(rtfs_type)/sizeof(rtfs_type[0]); i++) {
 
 		if (!__S_ISTYPE(s.st_mode, rtfs_type[i].type))
@@ -1184,7 +1186,14 @@ static int umount_oldrootfs(const char *oldrootfs)
 	return 0;
 }
 
+/*
+ created '/usr/local/lib/lxc/rootfs/lxc_putold' directory
+ mountpoint for old rootfs is '/usr/local/lib/lxc/rootfs/lxc_putold'
+ pivot_root syscall to '/usr/local/lib/lxc/rootfs' successful
+*/
+
 //把/usr/local/lib/lxc/rootfs设置为子进程容器新的跟目录
+//注意setup_rootfs中的mount和setup_rootfs_pivot_root这里的pivot_root的联系
 static int setup_rootfs_pivot_root(const char *rootfs, const char *pivotdir)
 {
 	char path[MAXPATHLEN];
@@ -1612,10 +1621,12 @@ int lxc_delete_autodev(struct lxc_handler *handler)
 	return 0;
 }
 
+//注意setup_rootfs中的mount和setup_rootfs_pivot_root这里的pivot_root的联系
 static int setup_rootfs(struct lxc_conf *conf)
 {
 	const struct lxc_rootfs *rootfs = &conf->rootfs;
 
+    //printf(".......... rootfspath:%s\r\n", rootfs->path); .......... rootfspath:/root/yyzdir/rootfs
 	if (!rootfs->path) {
 		if (mount("", "/", NULL, MS_SLAVE|MS_REC, 0)) {
 			SYSERROR("Failed to make / rslave");
@@ -1633,11 +1644,13 @@ static int setup_rootfs(struct lxc_conf *conf)
 	// First try mounting rootfs using a bdev
 	//获取文件系统类型
 	// ...... /usr/local/lib/lxc/rootfs, /, (null)  
+	// ...... /root/yyzdir/rootfs, /usr/local/lib/lxc/rootfs, (null)
 	//printf(" ...... %s, %s, %s\r\n", rootfs->path, rootfs->mount, rootfs->options);
 	struct bdev *bdev = bdev_init(rootfs->path, rootfs->mount, rootfs->options);
-	if (bdev && bdev->ops->mount(bdev) == 0) {
+	DEBUG("s bdev name: '%s'", bdev->type);
+	if (bdev && bdev->ops->mount(bdev) == 0) { //执行 bdevs 相应的回调
 		bdev_put(bdev);
-		DEBUG("mounted '%s' on '%s'", rootfs->path, rootfs->mount);
+		DEBUG("s mounted '%s' on '%s'", rootfs->path, rootfs->mount);
 		return 0;
 	}
 	if (bdev) 
@@ -1649,7 +1662,8 @@ static int setup_rootfs(struct lxc_conf *conf)
 		return -1;
 	}
 
-	DEBUG("mounted '%s' on '%s'", rootfs->path, rootfs->mount);
+    //mounted '/root/yyzdir/rootfs' on '/usr/local/lib/lxc/rootfs'
+	DEBUG("1  xx mounted '%s' on '%s'", rootfs->path, rootfs->mount);
 
 	return 0;
 }
@@ -4159,7 +4173,7 @@ static int do_tmp_proc_mount(const char *rootfs)
 	/* can't be longer than rootfs/proc/1 */
 
 	// .............. /usr/local/lib/lxc/rootfs  1  /usr/local/lib/lxc/rootfs/proc
-	printf(" .............. %s  %s  %s\r\n", rootfs, link, path);
+	//printf(" .............. %s  %s  %s\r\n", rootfs, link, path);
 	if (strncmp(link, "1", linklen) != 0) {
 		/* wrong /procs mounted */
 		umount2(path, MNT_DETACH); /* ignore failure */
@@ -4239,7 +4253,7 @@ void remount_all_slave(void)
  * container pre-mount hooks, and mounting the rootfs.
  */ //把lxc.rootfs跟文件系统挂载到--with-rootfs-path=/xx配置的地方
 int do_rootfs_setup(struct lxc_conf *conf, const char *name, const char *lxcpath)
-{
+{   
 	if (conf->rootfs_setup) {
 		/*
 		 * rootfs was set up in another namespace.  bind-mount it
@@ -4302,7 +4316,7 @@ int lxc_setup(struct lxc_handler *handler)
 	const char *lxcpath = handler->lxcpath;
 	void *data = handler->data;
 
-    //printf(" ...........pid:%d\r\n", getpid()); //...........pid:1
+    //printf(" ......sssssssssssss.....pid:%d\r\n", getpid()); //...........pid:1
     //把lxc.rootfs配置的跟文件系统挂载到--with-rootfs-path=/xx配置的地方
 	if (do_rootfs_setup(lxc_conf, name, lxcpath) < 0) {
 		ERROR("Error setting up rootfs mount after spawn");
@@ -4434,7 +4448,6 @@ int lxc_setup(struct lxc_handler *handler)
 		ERROR("failed to setup personality");
 		return -1;
 	}
-    printf("yang test 22222222\r\n");
 
 	if (!lxc_list_empty(&lxc_conf->keepcaps)) {
 		if (!lxc_list_empty(&lxc_conf->caps)) {
@@ -4450,7 +4463,6 @@ int lxc_setup(struct lxc_handler *handler)
 		return -1;
 	}
 
-    printf("yang test 1111111111111\r\n");
 	NOTICE("'%s' is setup.", name);
 
 	return 0;
