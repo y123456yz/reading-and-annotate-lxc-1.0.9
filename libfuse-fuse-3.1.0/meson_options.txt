@@ -1,2 +1,0 @@
-option('disable-mtab', type : 'boolean', value : false,
-       description: 'Disable and ignore usage of /etc/mtab')
