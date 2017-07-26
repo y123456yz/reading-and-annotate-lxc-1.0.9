@@ -2903,6 +2903,7 @@ static unsigned long get_memlimit(const char *cgroup)
 	return memlimit;
 }
 
+//获取cgroup目录及其子目录中 memory.limit_in_bytes的最小值
 static unsigned long get_min_memlimit(const char *cgroup)
 {
 	char *copy = strdupa(cgroup);
@@ -2951,12 +2952,20 @@ static int proc_meminfo_read(char *buf, size_t size, off_t offset,
 	pid_t initpid = lookup_initpid_in_store(fc->pid);
 	if (initpid <= 0)
 		initpid = fc->pid;
+		
+    //如果在容器中cat /proc/meminfo,则这里initpid为容器/sbin/init进程号，如果在主机中cat /usr/local/var/lib/lxcfs/proc/meminfo
+    //initpid为主机的进程号1，  这里的getpid为lxcfs进程号
+	//fprintf(stderr, "yang test ....... initpid:%d, pid:%d, getpid:%d\r\n", initpid, fc->pid, getpid());
 	cg = get_pid_cgroup(initpid, "memory");
+
+	//fprintf(stderr, "yang test .....CG:%s\n", cg);
+	//yang test .....CG:/lxc/yyz-test-49   主机中cat这里为/， 容器中cat这里为/lxc/yyz-test
 	if (!cg)
 		return read_file("/proc/meminfo", buf, size, d);
+
 	prune_init_slice(cg);
 
-	memlimit = get_min_memlimit(cg);
+	memlimit = get_min_memlimit(cg); //获取cgroup目录及其子目录中 memory.limit_in_bytes的最小值
 	if (!cgfs_get_value("memory", cg, "memory.usage_in_bytes", &memusage_str))
 		goto err;
 	if (!cgfs_get_value("memory", cg, "memory.stat", &memstat_str))
@@ -3056,7 +3065,8 @@ static int proc_meminfo_read(char *buf, size_t size, off_t offset,
 	d->size = total_len;
 	if (total_len > size ) total_len = size;
 	memcpy(buf, d->buf, total_len);
-
+	//打印结果就是cat获取到的内容
+    //fprintf(stderr, "yang test .....buf:%s\n", buf);
 	rv = total_len;
 err:
 	if (f)

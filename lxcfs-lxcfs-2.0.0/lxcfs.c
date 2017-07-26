@@ -545,11 +545,70 @@ static int lxcfs_open(const char *path, struct fuse_file_info *fi)
 	return -EINVAL;
 }
 
+/*  cat /proc/cpuinfo 的系统调用
+[pid 38310] <... read resumed> "-\0\0\0\1\0\0\0l\0\0\0\0\0\0\0\1\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 135168) = 45
+[pid 38310] writev(4, [{"\220\0\0\0\0\0\0\0l\0\0\0\0\0\0\0", 16}, {"\3\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 128}], 2) = 144
+[pid 38310] read(4,  <unfinished ...>
+[pid 38312] <... read resumed> "0\0\0\0\1\0\0\0m\0\0\0\0\0\0\0\3\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 135168) = 48
+[pid 38312] writev(4, [{"\220\0\0\0\0\0\0\0m\0\0\0\0\0\0\0", 16}, {"\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 128}], 2) = 144
+[pid 38312] read(4,  <unfinished ...>
+[pid 38132] <... read resumed> "0\0\0\0\16\0\0\0n\0\0\0\0\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 135168) = 48
+[pid 38132] write(1, " ...........lxcfs_open........ p"..., 51 ...........lxcfs_open........ path:/proc/cpuinfo
+) = 51
+[pid 38132] open("/proc/cpuinfo", O_RDONLY) = 5
+[pid 38132] fstat(5, {st_mode=S_IFREG|0444, st_size=0, ...}) = 0
+[pid 38132] mmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f4c495b4000
+[pid 38132] read(5, "processor\t: 0\nvendor_id\t: Genuin"..., 1024) = 819
+[pid 38132] read(5, "", 1024)           = 0
+[pid 38132] close(5)                    = 0
+[pid 38132] munmap(0x7f4c495b4000, 4096) = 0
+[pid 38132] writev(4, [{" \0\0\0\0\0\0\0n\0\0\0\0\0\0\0", 16}, {"\0\t\0<L\177\0\0\1\0\0\0\0\0\0\0", 16}], 2) = 32
+[pid 38132] read(4,  <unfinished ...>
+[pid 38131] <... read resumed> "P\0\0\0\17\0\0\0o\0\0\0\0\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 135168) = 80
+[pid 38131] write(1, " .................lxcfs_read.. p"..., 51 .................lxcfs_read.. path:/proc/cpuinfo
+) = 51
+[pid 38131] stat("/proc/38497/ns/pid", {st_mode=S_IFREG|0444, st_size=0, ...}) = 0
+[pid 38131] stat("/proc/1", {st_mode=S_IFDIR|0555, st_size=0, ...}) = 0
+[pid 38131] open("/proc/1/cgroup", O_RDONLY) = 5
+[pid 38131] fstat(5, {st_mode=S_IFREG|0444, st_size=0, ...}) = 0
+[pid 38131] mmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f4c495b4000
+[pid 38131] read(5, "11:devices:/\n10:cpuset:/\n9:memor"..., 1024) = 148
+[pid 38131] close(5)                    = 0
+[pid 38131] munmap(0x7f4c495b4000, 4096) = 0
+[pid 38131] open("/run/lxcfs/controllers/cpuset///cpuset.cpus", O_RDONLY) = 5
+[pid 38131] fstat(5, {st_mode=S_IFREG|0644, st_size=0, ...}) = 0
+[pid 38131] mmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f4c495b4000
+[pid 38131] read(5, "0\n", 4096)        = 2
+[pid 38131] read(5, "", 4096)           = 0
+[pid 38131] close(5)                    = 0
+[pid 38131] munmap(0x7f4c495b4000, 4096) = 0
+[pid 38131] open("/proc/cpuinfo", O_RDONLY) = 5
+[pid 38131] fstat(5, {st_mode=S_IFREG|0444, st_size=0, ...}) = 0
+[pid 38131] mmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f4c495b4000
+[pid 38131] read(5, "processor\t: 0\nvendor_id\t: Genuin"..., 1024) = 819
+[pid 38131] read(5, "", 1024)           = 0
+[pid 38131] close(5)                    = 0
+[pid 38131] munmap(0x7f4c495b4000, 4096) = 0
+[pid 38131] writev(4, [{"C\3\0\0\0\0\0\0o\0\0\0\0\0\0\0", 16}, {"processor\t: 0\nvendor_id\t: Genuin"..., 819}], 2) = 835
+[pid 38131] read(4,  <unfinished ...>
+[pid 38311] <... read resumed> "P\0\0\0\17\0\0\0p\0\0\0\0\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 135168) = 80
+[pid 38311] write(1, " .................lxcfs_read.. p"..., 51 .................lxcfs_read.. path:/proc/cpuinfo
+) = 51
+[pid 38311] writev(4, [{"\20\0\0\0\0\0\0\0p\0\0\0\0\0\0\0", 16}, {"", 0}], 2) = 16
+[pid 38311] read(4,  <unfinished ...>
+[pid 38310] <... read resumed> "@\0\0\0\31\0\0\0q\0\0\0\0\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 135168) = 64
+[pid 38310] writev(4, [{"\20\0\0\0\0\0\0\0q\0\0\0\0\0\0\0", 16}], 1) = 16
+[pid 38310] read(4,  <unfinished ...>
+[pid 38312] <... read resumed> "@\0\0\0\22\0\0\0r\0\0\0\0\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 135168) = 64
+[pid 38312] writev(4, [{"\20\0\0\0\0\0\0\0r\0\0\0\0\0\0\0", 16}], 1) = 16
+[pid 38312] read(4, 
+
+*/
 static int lxcfs_read(const char *path, char *buf, size_t size, off_t offset,
 		struct fuse_file_info *fi)
 {
-    printf(" .................lxcfs_read.. path:%s\r\n", path);
 	int ret;
+
 	if (strncmp(path, "/cgroup", 7) == 0) {
 		up_users();
 		ret = do_cg_read(path, buf, size, offset, fi);

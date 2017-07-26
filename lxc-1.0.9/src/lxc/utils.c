@@ -1385,8 +1385,9 @@ int safe_mount(const char *src, const char *dest, const char *fstype,
 		ERROR("Out of memory");
 		return -EINVAL;
 	}
-
+    
 	ret = mount(mntsrc, destbuf, fstype, flags, data);
+
 	saved_errno = errno;
 	if (srcfd != -1)
 		close(srcfd);

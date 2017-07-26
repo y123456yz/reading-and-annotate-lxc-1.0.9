@@ -1282,6 +1282,14 @@ struct start_args {
 	char *const *argv;
 };
 
+/*
+main函数中指定:
+char *const default_args[] = {
+	"/sbin/init",
+	NULL,
+};
+*/
+
 //do_start中执行
 static int start(struct lxc_handler *handler, void* data)
 {

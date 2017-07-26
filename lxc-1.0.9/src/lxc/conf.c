@@ -744,6 +744,10 @@ static unsigned long add_required_remount_flags(const char *s, const char *d,
 #endif
 }
 
+
+/* do automatic mounts (mainly /proc and /sys), but exclude
+ * those that need to wait until other stuff has finished
+ */
 static int lxc_mount_auto_mounts(struct lxc_conf *conf, int flags, struct lxc_handler *handler)
 {
 	int r;
@@ -812,6 +816,10 @@ static int lxc_mount_auto_mounts(struct lxc_conf *conf, int flags, struct lxc_ha
 					default_mounts[i].flags);
 			r = safe_mount(source, destination, default_mounts[i].fstype, mflags, default_mounts[i].options, conf->rootfs.path ? conf->rootfs.mount : NULL);
 			saved_errno = errno;
+
+            //............ safe mount:proc  /usr/local/lib/lxc/rootfs/proc  proc  0x:e
+            //............ safe mount:sysfs  /usr/local/lib/lxc/rootfs/sys  sysfs  0x:1
+			//printf("............ safe mount:%s  %s  %s  0x:%x\r\n", source, destination, default_mounts[i].fstype, (unsigned int)mflags);
 			if (r < 0 && errno == ENOENT) {
 				INFO("Mount source or target for %s on %s doesn't exist. Skipping.", source, destination);
 				r = 0;
@@ -827,7 +835,7 @@ static int lxc_mount_auto_mounts(struct lxc_conf *conf, int flags, struct lxc_ha
 		}
 	}
 
-	if (flags & LXC_AUTO_CGROUP_MASK) {
+	if (flags & LXC_AUTO_CGROUP_MASK) { //"lxc.mount.auto"相关配置才会走到这里面
 		int cg_flags;
 
 		cg_flags = flags & LXC_AUTO_CGROUP_MASK;
@@ -852,7 +860,7 @@ static int lxc_mount_auto_mounts(struct lxc_conf *conf, int flags, struct lxc_ha
 				cg_flags = has_sys_admin ? LXC_AUTO_CGROUP_FULL_RW : LXC_AUTO_CGROUP_FULL_MIXED;
 			}
 		}
-
+    
 		if (!cgroup_mount(conf->rootfs.path ? conf->rootfs.mount : "", handler, cg_flags)) {
 			SYSERROR("error mounting /sys/fs/cgroup");
 			return -1;
@@ -867,7 +875,7 @@ static int mount_rootfs(const char *rootfs, const char *target, const char *opti
 	char absrootfs[MAXPATHLEN];
 	struct stat s;
 	int i;
-    printf("11111111111111111111111111111\r\n");
+	
 	typedef int (*rootfs_cb)(const char *, const char *, const char *);
 
 	struct rootfs_type {
@@ -894,7 +902,7 @@ static int mount_rootfs(const char *rootfs, const char *target, const char *opti
 		return -1;
 	}
 
-    DEBUG("......................... %s, %s", absrootfs, target);
+    //DEBUG("......................... %s, %s", absrootfs, target);
 	for (i = 0; i < sizeof(rtfs_type)/sizeof(rtfs_type[0]); i++) {
 
 		if (!__S_ISTYPE(s.st_mode, rtfs_type[i].type))
@@ -1193,7 +1201,7 @@ static int umount_oldrootfs(const char *oldrootfs)
 */
 
 //把/usr/local/lib/lxc/rootfs设置为子进程容器新的跟目录
-//注意setup_rootfs中的mount和setup_rootfs_pivot_root这里的pivot_root的联系
+//注意setup_rootfs中的mount和lxc_mount_auto_mounts  setup_rootfs_pivot_root这里的pivot_root的联系
 static int setup_rootfs_pivot_root(const char *rootfs, const char *pivotdir)
 {
 	char path[MAXPATHLEN];
@@ -1207,7 +1215,7 @@ static int setup_rootfs_pivot_root(const char *rootfs, const char *pivotdir)
 	}
 
     //yang test xxxxxxxx  pivotdir:(null)
-    //printf("yang test xxxxxxxx  pivotdir:%s\r\n", pivotdir);
+    printf("yang test xxxxxxxx rootfs:%s pivotdir:%s\r\n", rootfs, pivotdir);
 	if (!pivotdir)
 		pivotdir = "lxc_putold";
 
@@ -1233,6 +1241,12 @@ static int setup_rootfs_pivot_root(const char *rootfs, const char *pivotdir)
     // mountpoint for old rootfs is '/usr/local/lib/lxc/rootfs/lxc_putold'
 	DEBUG("mountpoint for old rootfs is '%s'", path);
 
+    #define FILEPATH_MAX 100
+    char file_path_getcwd[FILEPATH_MAX];
+    memset(file_path_getcwd, 0, FILEPATH_MAX);
+    getcwd(file_path_getcwd,FILEPATH_MAX);
+    printf("yang test 1111111111111111   %s\r\n", file_path_getcwd);
+
 	/* pivot_root into our new root fs */ //新的root fs目录切换为/usr/local/lib/lxc/rootfs
 	//pivot_root把当前进程的root文件系统放到put_old(/usr/local/lib/lxc/rootfs/lxc_putold)目录，而使new_root成为新的root文件系统(/usr/local/lib/lxc/rootfs)。
 	if (pivot_root(".", path)) { //path:/usr/local/lib/lxc/rootfs/lxc_putold  ".":当前目录/usr/local/lib/lxc/rootfs
@@ -1240,10 +1254,20 @@ static int setup_rootfs_pivot_root(const char *rootfs, const char *pivotdir)
 		return -1;
 	}
 
+	
+    memset(file_path_getcwd, 0, FILEPATH_MAX);
+    getcwd(file_path_getcwd,FILEPATH_MAX);
+    printf("yang test 222222222222222222222   %s\r\n", file_path_getcwd);
+
 	if (chdir("/")) {
 		SYSERROR("can't chdir to / after pivot_root");
 		return -1;
 	}
+
+	
+    memset(file_path_getcwd, 0, FILEPATH_MAX);
+    getcwd(file_path_getcwd,FILEPATH_MAX);
+    printf("yang test 333333333333333    %s\r\n", file_path_getcwd);
 
 	DEBUG("pivot_root syscall to '%s' successful", rootfs);
 
@@ -1621,7 +1645,7 @@ int lxc_delete_autodev(struct lxc_handler *handler)
 	return 0;
 }
 
-//注意setup_rootfs中的mount和setup_rootfs_pivot_root这里的pivot_root的联系
+//注意setup_rootfs中的mount和 lxc_mount_auto_mounts  setup_rootfs_pivot_root这里的pivot_root的联系   
 static int setup_rootfs(struct lxc_conf *conf)
 {
 	const struct lxc_rootfs *rootfs = &conf->rootfs;
@@ -1651,6 +1675,7 @@ static int setup_rootfs(struct lxc_conf *conf)
 	if (bdev && bdev->ops->mount(bdev) == 0) { //执行 bdevs 相应的回调
 		bdev_put(bdev);
 		DEBUG("s mounted '%s' on '%s'", rootfs->path, rootfs->mount);
+		
 		return 0;
 	}
 	if (bdev) 
@@ -2520,6 +2545,7 @@ out:
 	return ret;
 }
 
+////lxc.mount配置相关，真正的生效mount在这里
 static int setup_mount(const struct lxc_rootfs *rootfs, const char *fstab,
 	const char *lxc_name, const char *lxc_path)
 {
@@ -4125,6 +4151,8 @@ static int check_autodev( const struct lxc_rootfs *rootfs, void *data )
     
 		ret = readlink( abs_path, path, MAXPATHLEN-1 );
 
+        while(1);
+        
 		if ( ( ret <= 0 ) || ( ++loop_count > MAX_SYMLINK_DEPTH ) ) {
 			break; /* Break out for other tests */
 		}
@@ -4183,6 +4211,7 @@ static int do_tmp_proc_mount(const char *rootfs)
 	return 0;
 
 domount: 
+
 	if (safe_mount("proc", path, "proc", 0, NULL, rootfs)) //mount 跟目录的proc到/usr/local/lib/lxc/rootfs/proc
 		return -1;
 	INFO("Mounted /proc in container for security transition");
@@ -4362,6 +4391,8 @@ int lxc_setup(struct lxc_handler *handler)
 	/* do automatic mounts (mainly /proc and /sys), but exclude
 	 * those that need to wait until other stuff has finished
 	 */
+	//............ safe mount:proc  /usr/local/lib/lxc/rootfs/proc  proc  0x:e
+    //............ safe mount:sysfs  /usr/local/lib/lxc/rootfs/sys  sysfs  0x:1
 	if (lxc_mount_auto_mounts(lxc_conf, lxc_conf->auto_mounts & ~LXC_AUTO_CGROUP_MASK, handler) < 0) {
 		ERROR("failed to setup the automatic mounts for '%s'", name);
 		return -1;
@@ -4385,6 +4416,7 @@ int lxc_setup(struct lxc_handler *handler)
 	 * before, /sys could not have been mounted
 	 * (is either mounted automatically or via fstab entries)
 	 */
+	 //
 	if (lxc_mount_auto_mounts(lxc_conf, lxc_conf->auto_mounts & LXC_AUTO_CGROUP_MASK, handler) < 0) {
 		ERROR("failed to setup the automatic mounts for '%s'", name);
 		return -1;
@@ -4438,6 +4470,7 @@ int lxc_setup(struct lxc_handler *handler)
 		ERROR("failed to set rootfs for '%s'", name);
 		return -1;
 	}
+
 
 	if (setup_pts(lxc_conf->pts)) {
 		ERROR("failed to setup the new pts instance");

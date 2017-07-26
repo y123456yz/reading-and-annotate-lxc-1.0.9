@@ -101,7 +101,7 @@ static int config_start(const char *, const char *, struct lxc_conf *);
 static int config_group(const char *, const char *, struct lxc_conf *);
 
 //解析到相应配置的回调//parse_line->lxc_getconfig  config
-static struct lxc_config_t config[] = {
+static struct lxc_config_t config[] = { //配置官方说明:http://www.man7.org/linux/man-pages/man5/lxc.container.conf.5.html
 
 	{ "lxc.arch",                 config_personality          },
 	{ "lxc.pts",                  config_pts                  },
@@ -152,6 +152,7 @@ static struct lxc_config_t config[] = {
 	{ "lxc.console",              config_console              },
 	{ "lxc.seccomp",              config_seccomp              },
 	{ "lxc.include",              config_includefile          },
+	//Set this to 0 to stop LXC from mounting and populating a minimal /dev when starting the container.
 	{ "lxc.autodev",              config_autodev              },
 	{ "lxc.haltsignal",           config_haltsignal           },
 	{ "lxc.stopsignal",           config_stopsignal           },
@@ -1414,6 +1415,7 @@ static int config_fstab(const char *key, const char *value,
 	return config_path_item(&lxc_conf->fstab, value);
 }
 
+//"lxc.mount.auto"配置
 static int config_mount_auto(const char *key, const char *value,
 			     struct lxc_conf *lxc_conf)
 {

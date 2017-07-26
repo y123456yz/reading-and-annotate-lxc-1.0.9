@@ -304,7 +304,7 @@ struct saved_nic {
 //赋值见parse_line->lxc_getconfig  config
 struct lxc_conf {
 	int is_execute;
-	char *fstab;
+	char *fstab; //lxc.mount配置相关，真正的生效mount在lxc_setup->setup_mount
 	int tty;
 	int pts;
 	int reboot;
@@ -317,8 +317,8 @@ struct lxc_conf {
 	struct lxc_list network; 
 	struct saved_nic *saved_nics;
 	int num_savednics; //赋值见save_phys_nics
-	int auto_mounts;
-	struct lxc_list mount_list;
+	int auto_mounts; //"lxc.mount.auto"配置相关
+	struct lxc_list mount_list; //lxc.mount.entry配置，真正的生效mount在lxc_setup->setup_mount_entries
 	struct lxc_list caps;
 	struct lxc_list keepcaps;
 	//生效见lxc_create_tty
