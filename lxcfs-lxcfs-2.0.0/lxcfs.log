@@ -1,55 +1,12 @@
-hierarchies: 0: devices
- 1: cpuset
+nohup: 忽略输入
+hierarchies: 0: pids
+ 1: devices
  2: memory
- 3: blkio
- 4: pids
- 5: freezer
- 6: cpuacct,cpu
- 7: perf_event
- 8: hugetlb
- 9: net_prio,net_cls
+ 3: hugetlb
+ 4: perf_event
+ 5: cpuacct,cpu
+ 6: cpuset
+ 7: blkio
+ 8: net_prio,net_cls
+ 9: freezer
  10: name=systemd
-yang test .....buf:MemTotal:        2899452 kB
-MemFree:         2451280 kB
-MemAvailable:    2451280 kB
-Buffers:               0 kB
-Cached:           395956 kB
-SwapCached:            0 kB
-Active:           254888 kB
-Inactive:         193316 kB
-Active(anon):     116720 kB
-Inactive(anon):    67204 kB
-Active(file):     138168 kB
-Inactive(file):   126112 kB
-Unevictable:           0 kB
-Mlocked:               0 kB
-SwapTotal:       3145724 kB
-SwapFree:        3145724 kB
-Dirty:              1276 kB
-Writeback:             0 kB
-AnonPages:         52192 kB
-Mapped:            38100 kB
-Shmem:            131672 kB
-Slab:               0 kB
-SReclaimable:      73892 kB
-SUnreclaim:        72232 kB
-KernelStack:        4368 kB
-PageTables:         7560 kB
-NFS_Unstable:          0 kB
-Bounce:                0 kB
-WritebackTmp:          0 kB
-CommitLimit:     4595448 kB
-Committed_AS:     555156 kB
-VmallocTotal:   34359738367 kB
-VmallocUsed:      183060 kB
-VmallocChunk:   34359310332 kB
-HardwareCorrupted:     0 kB
-AnonHugePages:      2048 kB
-HugePages_Total:       0
-HugePages_Free:        0
-HugePages_Rsvd:        0
-HugePages_Surp:        0
-Hugepagesize:       2048 kB
-DirectMap4k:      124800 kB
-DirectMap2M:     3020800 kB
-
