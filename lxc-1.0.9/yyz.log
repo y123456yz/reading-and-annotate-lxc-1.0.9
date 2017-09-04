@@ -543,3 +543,404 @@
       lxc-start 1501005779.804 DEBUG    lxc_commands - commands.c:lxc_cmd_handler:900 - peer has disconnected
       lxc-start 1501005779.804 DEBUG    lxc_commands - commands.c:lxc_cmd_handler:900 - peer has disconnected
       lxc-start 1501005779.805 DEBUG    lxc_commands - commands.c:lxc_cmd_handler:900 - peer has disconnected
+      lxc-start 1501586617.875 DEBUG    lxc_start_ui - lxc_start.c:main:239 -  ................./usr/local/var/lib/lxc
+      lxc-start 1501586617.881 WARN     lxc_log - log.c:lxc_log_init:331 - lxc_log_init called with log already initialized
+      lxc-start 1501586617.897 DEBUG    lxc_conf - conf.c:lxc_create_tty:3885 - allocated pty '/dev/pts/1' (5/6)
+      lxc-start 1501586617.897 DEBUG    lxc_conf - conf.c:lxc_create_tty:3885 - allocated pty '/dev/pts/2' (7/8)
+      lxc-start 1501586617.897 DEBUG    lxc_conf - conf.c:lxc_create_tty:3885 - allocated pty '/dev/pts/3' (9/10)
+      lxc-start 1501586617.897 DEBUG    lxc_conf - conf.c:lxc_create_tty:3885 - allocated pty '/dev/pts/4' (11/12)
+      lxc-start 1501586617.897 INFO     lxc_conf - conf.c:lxc_create_tty:3896 - tty's configured
+      lxc-start 1501586617.898 DEBUG    lxc_start - start.c:setup_signal_fd:275 - sigchild handler set
+      lxc-start 1501586617.898 DEBUG    console - console.c:lxc_console_peer_default:500 - opening /dev/tty for console peer
+      lxc-start 1501586617.898 DEBUG    console - console.c:lxc_console_peer_default:506 - using '/dev/tty' as console
+      lxc-start 1501586617.898 DEBUG    console - console.c:lxc_console_sigwinch_init:179 - 22940 got SIGWINCH fd 17
+      lxc-start 1501586617.898 DEBUG    console - console.c:lxc_console_winsz:88 - set winsz dstfd:14 cols:236 rows:67
+      lxc-start 1501586617.898 INFO     lxc_start - start.c:lxc_init:487 - 'yyz-test' is initialized
+      lxc-start 1501586617.899 DEBUG    lxc_start - start.c:__lxc_start:1187 - Not dropping cap_sys_boot or watching utmp
+      lxc-start 1501586617.934 DEBUG    lxc_conf - conf.c:instantiate_veth:3199 - instantiated veth 'vethU585GU/veth5D7FKU', index is '5'
+      lxc-start 1501586617.934 INFO     lxc_cgroup - cgroup.c:cgroup_init:62 - cgroup driver cgroupfs initing for yyz-test
+      lxc-start 1501586617.976 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.deny' set to 'a'
+      lxc-start 1501586617.976 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c *:* m'
+      lxc-start 1501586617.976 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'b *:* m'
+      lxc-start 1501586617.976 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:3 rwm'
+      lxc-start 1501586617.976 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:5 rwm'
+      lxc-start 1501586617.976 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:7 rwm'
+      lxc-start 1501586617.976 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 5:0 rwm'
+      lxc-start 1501586617.976 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:8 rwm'
+      lxc-start 1501586617.976 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:9 rwm'
+      lxc-start 1501586617.976 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 136:* rwm'
+      lxc-start 1501586617.976 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 5:2 rwm'
+      lxc-start 1501586617.976 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 10:229 rwm'
+      lxc-start 1501586617.976 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'memory.limit_in_bytes' set to '512M'
+      lxc-start 1501586617.976 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'cpuset.cpus' set to '0'
+      lxc-start 1501586617.976 INFO     lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2234 - cgroup has been setup
+      lxc-start 1501586617.987 DEBUG    lxc_conf - conf.c:lxc_assign_network:3637 - move '(null)' to '22949'
+      lxc-start 1501586617.993 DEBUG    lxc_conf - conf.c:setup_rootfs:1674 - s bdev name: 'dir'
+      lxc-start 1501586617.993 DEBUG    lxc_conf - conf.c:setup_rootfs:1677 - s mounted '/root/yyzdir/rootfs' on '/usr/local/lib/lxc/rootfs'
+      lxc-start 1501586617.993 INFO     lxc_conf - conf.c:setup_utsname:928 - 'yyztest1' hostname has been setup
+      lxc-start 1501586618.000 DEBUG    lxc_conf - conf.c:setup_netdev:2978 - 'eth0' has been setup
+      lxc-start 1501586618.000 INFO     lxc_conf - conf.c:setup_network:2999 - network has been setup
+      lxc-start 1501586618.000 INFO     lxc_conf - conf.c:mount_autodev:1477 - Mounting container /dev
+      lxc-start 1501586618.001 DEBUG    lxc_conf - conf.c:mount_check_fs:1309 - entering mount_check_fs for /dev
+      lxc-start 1501586618.002 DEBUG    lxc_conf - conf.c:mount_check_fs:1351 - mount_check_fs returning 1 last devtmpfs
+      lxc-start 1501586618.002 ERROR    lxc_conf - conf.c:mount_autodev:1501 - No such file or directory - WARNING: Failed to create symlink '/usr/local/var/lib/lxc/yyz-test/rootfs.dev'->'/dev/.lxc/yyz-test.c03c1e78262749d2'
+      lxc-start 1501586618.004 DEBUG    lxc_conf - conf.c:mount_autodev:1503 - Bind mounting /dev/.lxc/yyz-test.c03c1e78262749d2 to /usr/local/lib/lxc/rootfs/dev
+      lxc-start 1501586618.013 INFO     lxc_conf - conf.c:mount_autodev:1535 - Mounted container /dev
+      lxc-start 1501586618.028 INFO     lxc_conf - conf.c:run_script_argv:361 - Executing script '/usr/local/share/lxcfs/lxc.mount.hook' for container 'yyz-test', config section 'lxc'
+      lxc-start 1501586618.077 INFO     lxc_conf - conf.c:setup_autodev:1563 - Creating initial consoles under container /dev
+      lxc-start 1501586618.077 INFO     lxc_conf - conf.c:setup_autodev:1571 - Populating container /dev
+      lxc-start 1501586618.079 INFO     lxc_conf - conf.c:setup_autodev:1586 - Populated container /dev
+      lxc-start 1501586618.079 INFO     lxc_conf - conf.c:setup_ttydir_console:1932 - created /usr/local/lib/lxc/rootfs/dev/lxc
+      lxc-start 1501586618.080 INFO     lxc_conf - conf.c:setup_ttydir_console:1978 - console has been setup on lxc/console
+      lxc-start 1501586618.081 INFO     lxc_conf - conf.c:setup_tty:1057 - 4 tty(s) has been setup
+      lxc-start 1501586618.081 INFO     lxc_conf - conf.c:do_tmp_proc_mount:4197 - I am 1, /proc/self points to '1'
+      lxc-start 1501586618.084 DEBUG    lxc_conf - conf.c:setup_rootfs_pivot_root:1242 - mountpoint for old rootfs is '/usr/local/lib/lxc/rootfs/lxc_putold'
+      lxc-start 1501586618.086 DEBUG    lxc_conf - conf.c:setup_rootfs_pivot_root:1272 - pivot_root syscall to '/usr/local/lib/lxc/rootfs' successful
+      lxc-start 1501586618.089 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/dev/shm'
+      lxc-start 1501586618.089 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/dev/pts'
+      lxc-start 1501586618.089 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/dev/mqueue'
+      lxc-start 1501586618.089 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/dev/hugepages'
+      lxc-start 1501586618.090 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/proc/sys/fs/binfmt_misc'
+      lxc-start 1501586618.090 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/proc/fs/nfsd'
+      lxc-start 1501586618.090 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/kernel/security'
+      lxc-start 1501586618.090 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/systemd'
+      lxc-start 1501586618.090 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/cpu,cpuacct'
+      lxc-start 1501586618.090 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/devices'
+      lxc-start 1501586618.090 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/perf_event'
+      lxc-start 1501586618.090 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/net_cls,net_prio'
+      lxc-start 1501586618.090 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/cpuset'
+      lxc-start 1501586618.091 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/memory'
+      lxc-start 1501586618.091 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/blkio'
+      lxc-start 1501586618.091 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/pids'
+      lxc-start 1501586618.091 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/freezer'
+      lxc-start 1501586618.091 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/hugetlb'
+      lxc-start 1501586618.091 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/pstore'
+      lxc-start 1501586618.091 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/kernel/config'
+      lxc-start 1501586618.091 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/selinux'
+      lxc-start 1501586618.091 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/kernel/debug'
+      lxc-start 1501586618.092 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/run'
+      lxc-start 1501586618.092 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/boot'
+      lxc-start 1501586618.092 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/home'
+      lxc-start 1501586618.092 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/var/lib/nfs/rpc_pipefs'
+      lxc-start 1501586618.092 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/dev'
+      lxc-start 1501586618.092 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/proc'
+      lxc-start 1501586618.092 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup'
+      lxc-start 1501586618.092 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys'
+      lxc-start 1501586618.092 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold'
+      lxc-start 1501586618.092 INFO     lxc_conf - conf.c:setup_personality:1866 - set personality to '0x0'
+      lxc-start 1501586618.092 DEBUG    lxc_conf - conf.c:setup_caps:2669 - capabilities have been setup
+      lxc-start 1501586618.092 NOTICE   lxc_conf - conf.c:lxc_setup:4499 - 'yyz-test' is setup.
+      lxc-start 1501586618.093 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.deny' set to 'a'
+      lxc-start 1501586618.093 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c *:* m'
+      lxc-start 1501586618.093 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'b *:* m'
+      lxc-start 1501586618.093 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:3 rwm'
+      lxc-start 1501586618.093 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:5 rwm'
+      lxc-start 1501586618.093 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:7 rwm'
+      lxc-start 1501586618.093 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 5:0 rwm'
+      lxc-start 1501586618.093 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:8 rwm'
+      lxc-start 1501586618.093 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:9 rwm'
+      lxc-start 1501586618.093 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 136:* rwm'
+      lxc-start 1501586618.093 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 5:2 rwm'
+      lxc-start 1501586618.093 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 10:229 rwm'
+      lxc-start 1501586618.093 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'memory.limit_in_bytes' set to '512M'
+      lxc-start 1501586618.093 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'cpuset.cpus' set to '0'
+      lxc-start 1501586618.093 INFO     lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2234 - cgroup has been setup
+      lxc-start 1501586618.093 NOTICE   lxc_start - start.c:start:1298 - exec'ing '/sbin/init'
+      lxc-start 1501586618.160 NOTICE   lxc_start - start.c:post_start:1309 - '/sbin/init' started with pid '22949'
+      lxc-start 1501586618.160 WARN     lxc_start - start.c:signal_handler:328 - invalid pid for SIGCHLD 111111
+      lxc-start 1501586620.801 ERROR    console - console.c:lxc_console_cb_con:222 - Input/output error - failed to read
+      lxc-start 1502097574.587 DEBUG    lxc_start_ui - lxc_start.c:main:239 -  ................./usr/local/var/lib/lxc
+      lxc-start 1502097574.610 WARN     lxc_log - log.c:lxc_log_init:331 - lxc_log_init called with log already initialized
+      lxc-start 1502097574.651 DEBUG    lxc_conf - conf.c:lxc_create_tty:3885 - allocated pty '/dev/pts/2' (5/6)
+      lxc-start 1502097574.651 DEBUG    lxc_conf - conf.c:lxc_create_tty:3885 - allocated pty '/dev/pts/3' (7/8)
+      lxc-start 1502097574.651 DEBUG    lxc_conf - conf.c:lxc_create_tty:3885 - allocated pty '/dev/pts/4' (9/10)
+      lxc-start 1502097574.651 DEBUG    lxc_conf - conf.c:lxc_create_tty:3885 - allocated pty '/dev/pts/5' (11/12)
+      lxc-start 1502097574.651 INFO     lxc_conf - conf.c:lxc_create_tty:3896 - tty's configured
+      lxc-start 1502097574.651 DEBUG    lxc_start - start.c:setup_signal_fd:275 - sigchild handler set
+      lxc-start 1502097574.653 DEBUG    console - console.c:lxc_console_peer_default:500 - opening /dev/tty for console peer
+      lxc-start 1502097574.653 DEBUG    console - console.c:lxc_console_peer_default:506 - using '/dev/tty' as console
+      lxc-start 1502097574.653 DEBUG    console - console.c:lxc_console_sigwinch_init:179 - 78298 got SIGWINCH fd 17
+      lxc-start 1502097574.653 DEBUG    console - console.c:lxc_console_winsz:88 - set winsz dstfd:14 cols:236 rows:67
+      lxc-start 1502097574.653 INFO     lxc_start - start.c:lxc_init:487 - 'yyz-test' is initialized
+      lxc-start 1502097574.654 DEBUG    lxc_start - start.c:__lxc_start:1187 - Not dropping cap_sys_boot or watching utmp
+      lxc-start 1502097574.926 DEBUG    lxc_conf - conf.c:instantiate_veth:3199 - instantiated veth 'vethIVX7G7/veth32YKDT', index is '6'
+      lxc-start 1502097574.927 INFO     lxc_cgroup - cgroup.c:cgroup_init:62 - cgroup driver cgroupfs initing for yyz-test
+      lxc-start 1502097574.975 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.deny' set to 'a'
+      lxc-start 1502097574.975 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c *:* m'
+      lxc-start 1502097574.975 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'b *:* m'
+      lxc-start 1502097574.975 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:3 rwm'
+      lxc-start 1502097574.975 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:5 rwm'
+      lxc-start 1502097574.975 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:7 rwm'
+      lxc-start 1502097574.975 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 5:0 rwm'
+      lxc-start 1502097574.975 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:8 rwm'
+      lxc-start 1502097574.975 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:9 rwm'
+      lxc-start 1502097574.975 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 136:* rwm'
+      lxc-start 1502097574.975 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 5:2 rwm'
+      lxc-start 1502097574.975 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 10:229 rwm'
+      lxc-start 1502097574.975 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'memory.limit_in_bytes' set to '512M'
+      lxc-start 1502097574.975 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'cpuset.cpus' set to '0'
+      lxc-start 1502097574.975 INFO     lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2234 - cgroup has been setup
+      lxc-start 1502097574.980 DEBUG    lxc_conf - conf.c:lxc_assign_network:3637 - move '(null)' to '78302'
+      lxc-start 1502097574.987 DEBUG    lxc_conf - conf.c:setup_rootfs:1674 - s bdev name: 'dir'
+      lxc-start 1502097574.987 DEBUG    lxc_conf - conf.c:setup_rootfs:1677 - s mounted '/root/yyzdir/rootfs' on '/usr/local/lib/lxc/rootfs'
+      lxc-start 1502097574.987 INFO     lxc_conf - conf.c:setup_utsname:928 - 'yyztest1' hostname has been setup
+      lxc-start 1502097574.990 DEBUG    lxc_conf - conf.c:setup_netdev:2978 - 'eth0' has been setup
+      lxc-start 1502097574.990 INFO     lxc_conf - conf.c:setup_network:2999 - network has been setup
+      lxc-start 1502097574.990 INFO     lxc_conf - conf.c:mount_autodev:1477 - Mounting container /dev
+      lxc-start 1502097574.991 DEBUG    lxc_conf - conf.c:mount_check_fs:1309 - entering mount_check_fs for /dev
+      lxc-start 1502097574.991 DEBUG    lxc_conf - conf.c:mount_check_fs:1351 - mount_check_fs returning 1 last devtmpfs
+      lxc-start 1502097574.991 ERROR    lxc_conf - conf.c:mount_autodev:1501 - No such file or directory - WARNING: Failed to create symlink '/usr/local/var/lib/lxc/yyz-test/rootfs.dev'->'/dev/.lxc/yyz-test.c03c1e78262749d2'
+      lxc-start 1502097574.996 DEBUG    lxc_conf - conf.c:mount_autodev:1503 - Bind mounting /dev/.lxc/yyz-test.c03c1e78262749d2 to /usr/local/lib/lxc/rootfs/dev
+      lxc-start 1502097575.032 INFO     lxc_conf - conf.c:mount_autodev:1535 - Mounted container /dev
+      lxc-start 1502097575.079 INFO     lxc_conf - conf.c:run_script_argv:361 - Executing script '/usr/local/share/lxcfs/lxc.mount.hook' for container 'yyz-test', config section 'lxc'
+      lxc-start 1502097575.241 INFO     lxc_conf - conf.c:setup_autodev:1563 - Creating initial consoles under container /dev
+      lxc-start 1502097575.241 INFO     lxc_conf - conf.c:setup_autodev:1571 - Populating container /dev
+      lxc-start 1502097575.244 INFO     lxc_conf - conf.c:setup_autodev:1586 - Populated container /dev
+      lxc-start 1502097575.244 INFO     lxc_conf - conf.c:setup_ttydir_console:1932 - created /usr/local/lib/lxc/rootfs/dev/lxc
+      lxc-start 1502097575.245 INFO     lxc_conf - conf.c:setup_ttydir_console:1978 - console has been setup on lxc/console
+      lxc-start 1502097575.245 INFO     lxc_conf - conf.c:setup_tty:1057 - 4 tty(s) has been setup
+      lxc-start 1502097575.246 INFO     lxc_conf - conf.c:do_tmp_proc_mount:4197 - I am 1, /proc/self points to '1'
+      lxc-start 1502097575.288 DEBUG    lxc_conf - conf.c:setup_rootfs_pivot_root:1242 - mountpoint for old rootfs is '/usr/local/lib/lxc/rootfs/lxc_putold'
+      lxc-start 1502097575.289 DEBUG    lxc_conf - conf.c:setup_rootfs_pivot_root:1272 - pivot_root syscall to '/usr/local/lib/lxc/rootfs' successful
+      lxc-start 1502097575.289 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/dev/shm'
+      lxc-start 1502097575.289 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/dev/pts'
+      lxc-start 1502097575.290 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/dev/hugepages'
+      lxc-start 1502097575.291 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/dev/mqueue'
+      lxc-start 1502097575.291 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/proc/sys/fs/binfmt_misc'
+      lxc-start 1502097575.292 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/proc/fs/nfsd'
+      lxc-start 1502097575.292 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/kernel/security'
+      lxc-start 1502097575.292 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/systemd'
+      lxc-start 1502097575.292 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/cpu,cpuacct'
+      lxc-start 1502097575.292 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/perf_event'
+      lxc-start 1502097575.292 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/net_cls,net_prio'
+      lxc-start 1502097575.292 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/memory'
+      lxc-start 1502097575.292 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/hugetlb'
+      lxc-start 1502097575.292 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/devices'
+      lxc-start 1502097575.293 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/blkio'
+      lxc-start 1502097575.293 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/pids'
+      lxc-start 1502097575.293 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/freezer'
+      lxc-start 1502097575.293 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/cpuset'
+      lxc-start 1502097575.293 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/pstore'
+      lxc-start 1502097575.293 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/kernel/config'
+      lxc-start 1502097575.293 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/selinux'
+      lxc-start 1502097575.293 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/kernel/debug'
+      lxc-start 1502097575.293 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/run'
+      lxc-start 1502097575.293 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/home'
+      lxc-start 1502097575.293 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/boot'
+      lxc-start 1502097575.295 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/var/lib/nfs/rpc_pipefs'
+      lxc-start 1502097575.295 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/dev'
+      lxc-start 1502097575.296 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup'
+      lxc-start 1502097575.296 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys'
+      lxc-start 1502097575.296 INFO     lxc_conf - conf.c:umount_oldrootfs:1181 - lazy unmount of '/lxc_putold'
+      lxc-start 1502097575.296 WARN     lxc_conf - conf.c:umount_oldrootfs:1191 - failed to unmount '/lxc_putold/proc'
+      lxc-start 1502097575.296 INFO     lxc_conf - conf.c:setup_personality:1866 - set personality to '0x0'
+      lxc-start 1502097575.296 DEBUG    lxc_conf - conf.c:setup_caps:2669 - capabilities have been setup
+      lxc-start 1502097575.296 NOTICE   lxc_conf - conf.c:lxc_setup:4499 - 'yyz-test' is setup.
+      lxc-start 1502097575.299 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.deny' set to 'a'
+      lxc-start 1502097575.299 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c *:* m'
+      lxc-start 1502097575.299 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'b *:* m'
+      lxc-start 1502097575.299 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:3 rwm'
+      lxc-start 1502097575.299 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:5 rwm'
+      lxc-start 1502097575.299 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:7 rwm'
+      lxc-start 1502097575.299 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 5:0 rwm'
+      lxc-start 1502097575.299 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:8 rwm'
+      lxc-start 1502097575.299 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:9 rwm'
+      lxc-start 1502097575.300 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 136:* rwm'
+      lxc-start 1502097575.300 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 5:2 rwm'
+      lxc-start 1502097575.300 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 10:229 rwm'
+      lxc-start 1502097575.300 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'memory.limit_in_bytes' set to '512M'
+      lxc-start 1502097575.300 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'cpuset.cpus' set to '0'
+      lxc-start 1502097575.300 INFO     lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2234 - cgroup has been setup
+      lxc-start 1502097575.300 NOTICE   lxc_start - start.c:start:1298 - exec'ing '/sbin/init'
+      lxc-start 1502097575.524 NOTICE   lxc_start - start.c:post_start:1309 - '/sbin/init' started with pid '78302'
+      lxc-start 1502097575.524 WARN     lxc_start - start.c:signal_handler:328 - invalid pid for SIGCHLD 111111
+      lxc-start 1502097575.656 ERROR    console - console.c:lxc_console_cb_con:222 - Input/output error - failed to read
+      lxc-start 1502097629.963 DEBUG    lxc_start_ui - lxc_start.c:main:239 -  ................./usr/local/var/lib/lxc
+      lxc-start 1502097629.963 WARN     lxc_log - log.c:lxc_log_init:331 - lxc_log_init called with log already initialized
+      lxc-start 1502097629.966 DEBUG    lxc_conf - conf.c:lxc_create_tty:3885 - allocated pty '/dev/pts/2' (5/6)
+      lxc-start 1502097629.966 DEBUG    lxc_conf - conf.c:lxc_create_tty:3885 - allocated pty '/dev/pts/3' (7/8)
+      lxc-start 1502097629.966 DEBUG    lxc_conf - conf.c:lxc_create_tty:3885 - allocated pty '/dev/pts/4' (9/10)
+      lxc-start 1502097629.966 DEBUG    lxc_conf - conf.c:lxc_create_tty:3885 - allocated pty '/dev/pts/5' (11/12)
+      lxc-start 1502097629.966 INFO     lxc_conf - conf.c:lxc_create_tty:3896 - tty's configured
+      lxc-start 1502097629.966 DEBUG    lxc_start - start.c:setup_signal_fd:275 - sigchild handler set
+      lxc-start 1502097629.966 DEBUG    console - console.c:lxc_console_peer_default:500 - opening /dev/tty for console peer
+      lxc-start 1502097629.966 DEBUG    console - console.c:lxc_console_peer_default:506 - using '/dev/tty' as console
+      lxc-start 1502097629.966 DEBUG    console - console.c:lxc_console_sigwinch_init:179 - 78349 got SIGWINCH fd 17
+      lxc-start 1502097629.966 DEBUG    console - console.c:lxc_console_winsz:88 - set winsz dstfd:14 cols:236 rows:67
+      lxc-start 1502097629.966 INFO     lxc_start - start.c:lxc_init:487 - 'yyz-test' is initialized
+      lxc-start 1502097629.967 DEBUG    lxc_start - start.c:__lxc_start:1187 - Not dropping cap_sys_boot or watching utmp
+      lxc-start 1502097629.990 DEBUG    lxc_conf - conf.c:instantiate_veth:3199 - instantiated veth 'veth3R3GP1/vethR1CADS', index is '8'
+      lxc-start 1502097629.990 INFO     lxc_cgroup - cgroup.c:cgroup_init:62 - cgroup driver cgroupfs initing for yyz-test
+      lxc-start 1502097630.015 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.deny' set to 'a'
+      lxc-start 1502097630.015 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c *:* m'
+      lxc-start 1502097630.015 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'b *:* m'
+      lxc-start 1502097630.015 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:3 rwm'
+      lxc-start 1502097630.015 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:5 rwm'
+      lxc-start 1502097630.015 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:7 rwm'
+      lxc-start 1502097630.015 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 5:0 rwm'
+      lxc-start 1502097630.015 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:8 rwm'
+      lxc-start 1502097630.015 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:9 rwm'
+      lxc-start 1502097630.015 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 136:* rwm'
+      lxc-start 1502097630.015 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 5:2 rwm'
+      lxc-start 1502097630.015 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 10:229 rwm'
+      lxc-start 1502097630.015 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'memory.limit_in_bytes' set to '512M'
+      lxc-start 1502097630.015 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'cpuset.cpus' set to '0'
+      lxc-start 1502097630.015 INFO     lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2234 - cgroup has been setup
+      lxc-start 1502097630.022 DEBUG    lxc_conf - conf.c:lxc_assign_network:3637 - move '(null)' to '78356'
+      lxc-start 1502097630.027 DEBUG    lxc_conf - conf.c:setup_rootfs:1674 - s bdev name: 'dir'
+      lxc-start 1502097630.027 DEBUG    lxc_conf - conf.c:setup_rootfs:1677 - s mounted '/root/yyzdir/rootfs' on '/usr/local/lib/lxc/rootfs'
+      lxc-start 1502097630.027 INFO     lxc_conf - conf.c:setup_utsname:928 - 'yyztest1' hostname has been setup
+      lxc-start 1502097630.030 DEBUG    lxc_conf - conf.c:setup_netdev:2978 - 'eth0' has been setup
+      lxc-start 1502097630.030 INFO     lxc_conf - conf.c:setup_network:2999 - network has been setup
+      lxc-start 1502097630.030 INFO     lxc_conf - conf.c:mount_autodev:1477 - Mounting container /dev
+      lxc-start 1502097630.030 DEBUG    lxc_conf - conf.c:mount_check_fs:1309 - entering mount_check_fs for /dev
+      lxc-start 1502097630.030 DEBUG    lxc_conf - conf.c:mount_check_fs:1351 - mount_check_fs returning 1 last devtmpfs
+      lxc-start 1502097630.030 ERROR    lxc_conf - conf.c:mount_autodev:1501 - No such file or directory - WARNING: Failed to create symlink '/usr/local/var/lib/lxc/yyz-test/rootfs.dev'->'/dev/.lxc/yyz-test.c03c1e78262749d2'
+      lxc-start 1502097630.034 DEBUG    lxc_conf - conf.c:mount_autodev:1503 - Bind mounting /dev/.lxc/yyz-test.c03c1e78262749d2 to /usr/local/lib/lxc/rootfs/dev
+      lxc-start 1502097630.035 INFO     lxc_conf - conf.c:mount_autodev:1535 - Mounted container /dev
+      lxc-start 1502097630.035 INFO     lxc_conf - conf.c:run_script_argv:361 - Executing script '/usr/local/share/lxcfs/lxc.mount.hook' for container 'yyz-test', config section 'lxc'
+      lxc-start 1502097630.051 INFO     lxc_conf - conf.c:setup_autodev:1563 - Creating initial consoles under container /dev
+      lxc-start 1502097630.051 INFO     lxc_conf - conf.c:setup_autodev:1571 - Populating container /dev
+      lxc-start 1502097630.051 INFO     lxc_conf - conf.c:setup_autodev:1586 - Populated container /dev
+      lxc-start 1502097630.051 INFO     lxc_conf - conf.c:setup_ttydir_console:1932 - created /usr/local/lib/lxc/rootfs/dev/lxc
+      lxc-start 1502097630.051 INFO     lxc_conf - conf.c:setup_ttydir_console:1978 - console has been setup on lxc/console
+      lxc-start 1502097630.052 INFO     lxc_conf - conf.c:setup_tty:1057 - 4 tty(s) has been setup
+      lxc-start 1502097630.052 INFO     lxc_conf - conf.c:do_tmp_proc_mount:4197 - I am 1, /proc/self points to '1'
+      lxc-start 1502097630.054 DEBUG    lxc_conf - conf.c:setup_rootfs_pivot_root:1242 - mountpoint for old rootfs is '/usr/local/lib/lxc/rootfs/lxc_putold'
+      lxc-start 1502097630.055 DEBUG    lxc_conf - conf.c:setup_rootfs_pivot_root:1272 - pivot_root syscall to '/usr/local/lib/lxc/rootfs' successful
+      lxc-start 1502097630.056 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/dev/shm'
+      lxc-start 1502097630.056 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/dev/pts'
+      lxc-start 1502097630.056 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/dev/hugepages'
+      lxc-start 1502097630.057 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/dev/mqueue'
+      lxc-start 1502097630.057 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/proc/sys/fs/binfmt_misc'
+      lxc-start 1502097630.057 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/proc/fs/nfsd'
+      lxc-start 1502097630.057 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/kernel/security'
+      lxc-start 1502097630.057 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/systemd'
+      lxc-start 1502097630.057 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/cpu,cpuacct'
+      lxc-start 1502097630.057 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/perf_event'
+      lxc-start 1502097630.057 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/net_cls,net_prio'
+      lxc-start 1502097630.058 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/memory'
+      lxc-start 1502097630.058 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/hugetlb'
+      lxc-start 1502097630.058 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/devices'
+      lxc-start 1502097630.058 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/blkio'
+      lxc-start 1502097630.058 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/pids'
+      lxc-start 1502097630.058 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/freezer'
+      lxc-start 1502097630.058 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup/cpuset'
+      lxc-start 1502097630.058 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/pstore'
+      lxc-start 1502097630.058 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/kernel/config'
+      lxc-start 1502097630.058 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/selinux'
+      lxc-start 1502097630.058 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/kernel/debug'
+      lxc-start 1502097630.058 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/run'
+      lxc-start 1502097630.058 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/home'
+      lxc-start 1502097630.058 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/boot'
+      lxc-start 1502097630.060 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/var/lib/nfs/rpc_pipefs'
+      lxc-start 1502097630.060 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/dev'
+      lxc-start 1502097630.060 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/proc'
+      lxc-start 1502097630.060 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys/fs/cgroup'
+      lxc-start 1502097630.060 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold/sys'
+      lxc-start 1502097630.060 DEBUG    lxc_conf - conf.c:umount_oldrootfs:1166 - umounted '/lxc_putold'
+      lxc-start 1502097630.061 INFO     lxc_conf - conf.c:setup_personality:1866 - set personality to '0x0'
+      lxc-start 1502097630.061 DEBUG    lxc_conf - conf.c:setup_caps:2669 - capabilities have been setup
+      lxc-start 1502097630.061 NOTICE   lxc_conf - conf.c:lxc_setup:4499 - 'yyz-test' is setup.
+      lxc-start 1502097630.061 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.deny' set to 'a'
+      lxc-start 1502097630.061 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c *:* m'
+      lxc-start 1502097630.061 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'b *:* m'
+      lxc-start 1502097630.062 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:3 rwm'
+      lxc-start 1502097630.062 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:5 rwm'
+      lxc-start 1502097630.062 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:7 rwm'
+      lxc-start 1502097630.062 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 5:0 rwm'
+      lxc-start 1502097630.062 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:8 rwm'
+      lxc-start 1502097630.062 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:9 rwm'
+      lxc-start 1502097630.062 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 136:* rwm'
+      lxc-start 1502097630.062 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 5:2 rwm'
+      lxc-start 1502097630.062 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 10:229 rwm'
+      lxc-start 1502097630.062 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'memory.limit_in_bytes' set to '512M'
+      lxc-start 1502097630.062 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'cpuset.cpus' set to '0'
+      lxc-start 1502097630.062 INFO     lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2234 - cgroup has been setup
+      lxc-start 1502097630.062 NOTICE   lxc_start - start.c:start:1298 - exec'ing '/sbin/init'
+      lxc-start 1502097630.063 NOTICE   lxc_start - start.c:post_start:1309 - '/sbin/init' started with pid '78356'
+      lxc-start 1502097630.063 WARN     lxc_start - start.c:signal_handler:328 - invalid pid for SIGCHLD 111111
+      lxc-start 1502097671.658 DEBUG    lxc_commands - commands.c:lxc_cmd_handler:900 - peer has disconnected
+      lxc-start 1502097671.659 DEBUG    lxc_commands - commands.c:lxc_cmd_handler:900 - peer has disconnected
+      lxc-start 1502097671.659 DEBUG    lxc_commands - commands.c:lxc_cmd_handler:900 - peer has disconnected
+      lxc-start 1502097671.659 DEBUG    lxc_commands - commands.c:lxc_cmd_handler:900 - peer has disconnected
+      lxc-start 1502097671.660 DEBUG    lxc_commands - commands.c:lxc_cmd_handler:900 - peer has disconnected
+      lxc-start 1502097671.661 DEBUG    lxc_commands - commands.c:lxc_cmd_handler:900 - peer has disconnected
+      lxc-start 1502097671.661 DEBUG    lxc_commands - commands.c:lxc_cmd_handler:900 - peer has disconnected
+      lxc-start 1502097671.661 DEBUG    lxc_commands - commands.c:lxc_cmd_handler:900 - peer has disconnected
+      lxc-start 1502097671.661 DEBUG    lxc_commands - commands.c:lxc_cmd_handler:900 - peer has disconnected
+      lxc-start 1502097671.661 DEBUG    lxc_commands - commands.c:lxc_cmd_handler:900 - peer has disconnected
+      lxc-start 1502097671.661 DEBUG    lxc_commands - commands.c:lxc_cmd_handler:900 - peer has disconnected
+      lxc-start 1502097671.662 DEBUG    lxc_commands - commands.c:lxc_cmd_handler:900 - peer has disconnected
+      lxc-start 1502097671.662 DEBUG    lxc_commands - commands.c:lxc_cmd_handler:900 - peer has disconnected
+      lxc-start 1502097671.662 DEBUG    lxc_commands - commands.c:lxc_cmd_handler:900 - peer has disconnected
+      lxc-start 1502097773.725 DEBUG    lxc_start_ui - lxc_start.c:main:239 -  ................./usr/local/var/lib/lxc
+      lxc-start 1502097773.725 WARN     lxc_log - log.c:lxc_log_init:331 - lxc_log_init called with log already initialized
+      lxc-start 1502097773.729 DEBUG    lxc_conf - conf.c:lxc_create_tty:3885 - allocated pty '/dev/pts/2' (5/6)
+      lxc-start 1502097773.730 DEBUG    lxc_conf - conf.c:lxc_create_tty:3885 - allocated pty '/dev/pts/3' (7/8)
+      lxc-start 1502097773.730 DEBUG    lxc_conf - conf.c:lxc_create_tty:3885 - allocated pty '/dev/pts/4' (9/10)
+      lxc-start 1502097773.730 DEBUG    lxc_conf - conf.c:lxc_create_tty:3885 - allocated pty '/dev/pts/5' (11/12)
+      lxc-start 1502097773.730 INFO     lxc_conf - conf.c:lxc_create_tty:3896 - tty's configured
+      lxc-start 1502097773.730 DEBUG    lxc_start - start.c:setup_signal_fd:275 - sigchild handler set
+      lxc-start 1502097773.730 DEBUG    console - console.c:lxc_console_peer_default:500 - opening /dev/tty for console peer
+      lxc-start 1502097773.730 DEBUG    console - console.c:lxc_console_peer_default:506 - using '/dev/tty' as console
+      lxc-start 1502097773.730 DEBUG    console - console.c:lxc_console_sigwinch_init:179 - 78727 got SIGWINCH fd 17
+      lxc-start 1502097773.730 DEBUG    console - console.c:lxc_console_winsz:88 - set winsz dstfd:14 cols:236 rows:67
+      lxc-start 1502097773.730 INFO     lxc_start - start.c:lxc_init:487 - 'yyz-test' is initialized
+      lxc-start 1502097773.737 DEBUG    lxc_start - start.c:__lxc_start:1187 - Not dropping cap_sys_boot or watching utmp
+      lxc-start 1502097773.738 INFO     lxc_cgroup - cgroup.c:cgroup_init:62 - cgroup driver cgroupfs initing for yyz-test
+      lxc-start 1502097773.760 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.deny' set to 'a'
+      lxc-start 1502097773.760 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c *:* m'
+      lxc-start 1502097773.760 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'b *:* m'
+      lxc-start 1502097773.760 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:3 rwm'
+      lxc-start 1502097773.760 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:5 rwm'
+      lxc-start 1502097773.760 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:7 rwm'
+      lxc-start 1502097773.760 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 5:0 rwm'
+      lxc-start 1502097773.760 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:8 rwm'
+      lxc-start 1502097773.760 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:9 rwm'
+      lxc-start 1502097773.760 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 136:* rwm'
+      lxc-start 1502097773.760 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 5:2 rwm'
+      lxc-start 1502097773.760 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'memory.limit_in_bytes' set to '512M'
+      lxc-start 1502097773.760 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'memory.memsw.limit_in_bytes' set to '512M'
+      lxc-start 1502097773.760 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'cpuset.cpus' set to '0'
+      lxc-start 1502097773.760 INFO     lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2234 - cgroup has been setup
+      lxc-start 1502097773.772 DEBUG    lxc_conf - conf.c:setup_rootfs:1674 - s bdev name: 'dir'
+      lxc-start 1502097773.772 DEBUG    lxc_conf - conf.c:setup_rootfs:1677 - s mounted '/root/yyzdir/rootfs' on '/usr/local/lib/lxc/rootfs'
+      lxc-start 1502097773.772 INFO     lxc_conf - conf.c:setup_utsname:928 - 'yyz-test1' hostname has been setup
+      lxc-start 1502097773.774 INFO     lxc_conf - conf.c:setup_network:2999 - network has been setup
+      lxc-start 1502097773.774 DEBUG    lxc_conf - conf.c:check_autodev:4126 - Set exec command to /sbin/init
+      lxc-start 1502097873.673 DEBUG    lxc_start_ui - lxc_start.c:main:239 -  ................./usr/local/var/lib/lxc
+      lxc-start 1502097873.674 WARN     lxc_log - log.c:lxc_log_init:331 - lxc_log_init called with log already initialized
+      lxc-start 1502097873.677 DEBUG    lxc_conf - conf.c:lxc_create_tty:3885 - allocated pty '/dev/pts/2' (5/6)
+      lxc-start 1502097873.678 DEBUG    lxc_conf - conf.c:lxc_create_tty:3885 - allocated pty '/dev/pts/3' (7/8)
+      lxc-start 1502097873.678 DEBUG    lxc_conf - conf.c:lxc_create_tty:3885 - allocated pty '/dev/pts/4' (9/10)
+      lxc-start 1502097873.678 DEBUG    lxc_conf - conf.c:lxc_create_tty:3885 - allocated pty '/dev/pts/5' (11/12)
+      lxc-start 1502097873.678 INFO     lxc_conf - conf.c:lxc_create_tty:3896 - tty's configured
+      lxc-start 1502097873.678 DEBUG    lxc_start - start.c:setup_signal_fd:275 - sigchild handler set
+      lxc-start 1502097873.678 DEBUG    console - console.c:lxc_console_peer_default:500 - opening /dev/tty for console peer
+      lxc-start 1502097873.678 DEBUG    console - console.c:lxc_console_peer_default:506 - using '/dev/tty' as console
+      lxc-start 1502097873.678 DEBUG    console - console.c:lxc_console_sigwinch_init:179 - 78743 got SIGWINCH fd 17
+      lxc-start 1502097873.678 DEBUG    console - console.c:lxc_console_winsz:88 - set winsz dstfd:14 cols:236 rows:67
+      lxc-start 1502097873.678 INFO     lxc_start - start.c:lxc_init:487 - 'yyz-test' is initialized
+      lxc-start 1502097873.681 DEBUG    lxc_start - start.c:__lxc_start:1187 - Not dropping cap_sys_boot or watching utmp
+      lxc-start 1502097873.681 INFO     lxc_cgroup - cgroup.c:cgroup_init:62 - cgroup driver cgroupfs initing for yyz-test
+      lxc-start 1502097873.698 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.deny' set to 'a'
+      lxc-start 1502097873.698 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c *:* m'
+      lxc-start 1502097873.698 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'b *:* m'
+      lxc-start 1502097873.698 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:3 rwm'
+      lxc-start 1502097873.698 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:5 rwm'
+      lxc-start 1502097873.698 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:7 rwm'
+      lxc-start 1502097873.698 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 5:0 rwm'
+      lxc-start 1502097873.698 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:8 rwm'
+      lxc-start 1502097873.698 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 1:9 rwm'
+      lxc-start 1502097873.698 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 136:* rwm'
+      lxc-start 1502097873.698 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'devices.allow' set to 'c 5:2 rwm'
+      lxc-start 1502097873.698 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'memory.limit_in_bytes' set to '512M'
+      lxc-start 1502097873.698 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'memory.memsw.limit_in_bytes' set to '512M'
+      lxc-start 1502097873.698 DEBUG    lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2221 - cgroup 'cpuset.cpus' set to '0'
+      lxc-start 1502097873.698 INFO     lxc_cgfs - cgfs.c:do_setup_cgroup_limits:2234 - cgroup has been setup
+      lxc-start 1502097873.708 DEBUG    lxc_conf - conf.c:setup_rootfs:1674 - s bdev name: 'dir'
+      lxc-start 1502097873.708 DEBUG    lxc_conf - conf.c:setup_rootfs:1677 - s mounted '/root/yyzdir/rootfs' on '/usr/local/lib/lxc/rootfs'
+      lxc-start 1502097873.708 INFO     lxc_conf - conf.c:setup_utsname:928 - 'yyz-test1' hostname has been setup
+      lxc-start 1502097873.709 INFO     lxc_conf - conf.c:setup_network:2999 - network has been setup
+      lxc-start 1502097873.709 DEBUG    lxc_conf - conf.c:check_autodev:4126 - Set exec command to /sbin/init

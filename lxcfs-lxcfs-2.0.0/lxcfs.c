@@ -171,7 +171,6 @@ static int do_proc_read(const char *path, char *buf, size_t size, off_t offset,
 	char *error;
 
 	dlerror();    /* Clear any existing error */
-	//执行bingdings.c中的proc_read
 	proc_read = (int (*)(const char *, char *, size_t, off_t, struct fuse_file_info *)) dlsym(dlopen_handle, "proc_read");
 	error = dlerror();
 	if (error != NULL) {
@@ -489,7 +488,6 @@ static int lxcfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, of
 static int lxcfs_access(const char *path, int mode)
 {
 	int ret;
-	printf(" ...........lxcfs_access........ path:%s\r\n", path);
 	if (strncmp(path, "/cgroup", 7) == 0) {
 		up_users();
 		ret = do_cg_access(path, mode);
@@ -522,19 +520,15 @@ static int lxcfs_releasedir(const char *path, struct fuse_file_info *fi)
 	return -EINVAL;
 }
 
-//ls cat等相关命令必须跟上这两个参数，实际上/usr/local/var/lib/lxcfs/中的
 static int lxcfs_open(const char *path, struct fuse_file_info *fi)
 {
 	int ret;
-
-	printf(" ...........lxcfs_open........ path:%s\r\n", path);
 	if (strncmp(path, "/cgroup", 7) == 0) {
 		up_users();
 		ret = do_cg_open(path, fi);
 		down_users();
 		return ret;
 	}
-	
 	if (strncmp(path, "/proc", 5) == 0) {
 		up_users();
 		ret = do_proc_open(path, fi);
@@ -545,70 +539,10 @@ static int lxcfs_open(const char *path, struct fuse_file_info *fi)
 	return -EINVAL;
 }
 
-/*  cat /proc/cpuinfo 的系统调用
-[pid 38310] <... read resumed> "-\0\0\0\1\0\0\0l\0\0\0\0\0\0\0\1\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 135168) = 45
-[pid 38310] writev(4, [{"\220\0\0\0\0\0\0\0l\0\0\0\0\0\0\0", 16}, {"\3\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 128}], 2) = 144
-[pid 38310] read(4,  <unfinished ...>
-[pid 38312] <... read resumed> "0\0\0\0\1\0\0\0m\0\0\0\0\0\0\0\3\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 135168) = 48
-[pid 38312] writev(4, [{"\220\0\0\0\0\0\0\0m\0\0\0\0\0\0\0", 16}, {"\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 128}], 2) = 144
-[pid 38312] read(4,  <unfinished ...>
-[pid 38132] <... read resumed> "0\0\0\0\16\0\0\0n\0\0\0\0\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 135168) = 48
-[pid 38132] write(1, " ...........lxcfs_open........ p"..., 51 ...........lxcfs_open........ path:/proc/cpuinfo
-) = 51
-[pid 38132] open("/proc/cpuinfo", O_RDONLY) = 5
-[pid 38132] fstat(5, {st_mode=S_IFREG|0444, st_size=0, ...}) = 0
-[pid 38132] mmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f4c495b4000
-[pid 38132] read(5, "processor\t: 0\nvendor_id\t: Genuin"..., 1024) = 819
-[pid 38132] read(5, "", 1024)           = 0
-[pid 38132] close(5)                    = 0
-[pid 38132] munmap(0x7f4c495b4000, 4096) = 0
-[pid 38132] writev(4, [{" \0\0\0\0\0\0\0n\0\0\0\0\0\0\0", 16}, {"\0\t\0<L\177\0\0\1\0\0\0\0\0\0\0", 16}], 2) = 32
-[pid 38132] read(4,  <unfinished ...>
-[pid 38131] <... read resumed> "P\0\0\0\17\0\0\0o\0\0\0\0\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 135168) = 80
-[pid 38131] write(1, " .................lxcfs_read.. p"..., 51 .................lxcfs_read.. path:/proc/cpuinfo
-) = 51
-[pid 38131] stat("/proc/38497/ns/pid", {st_mode=S_IFREG|0444, st_size=0, ...}) = 0
-[pid 38131] stat("/proc/1", {st_mode=S_IFDIR|0555, st_size=0, ...}) = 0
-[pid 38131] open("/proc/1/cgroup", O_RDONLY) = 5
-[pid 38131] fstat(5, {st_mode=S_IFREG|0444, st_size=0, ...}) = 0
-[pid 38131] mmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f4c495b4000
-[pid 38131] read(5, "11:devices:/\n10:cpuset:/\n9:memor"..., 1024) = 148
-[pid 38131] close(5)                    = 0
-[pid 38131] munmap(0x7f4c495b4000, 4096) = 0
-[pid 38131] open("/run/lxcfs/controllers/cpuset///cpuset.cpus", O_RDONLY) = 5
-[pid 38131] fstat(5, {st_mode=S_IFREG|0644, st_size=0, ...}) = 0
-[pid 38131] mmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f4c495b4000
-[pid 38131] read(5, "0\n", 4096)        = 2
-[pid 38131] read(5, "", 4096)           = 0
-[pid 38131] close(5)                    = 0
-[pid 38131] munmap(0x7f4c495b4000, 4096) = 0
-[pid 38131] open("/proc/cpuinfo", O_RDONLY) = 5
-[pid 38131] fstat(5, {st_mode=S_IFREG|0444, st_size=0, ...}) = 0
-[pid 38131] mmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f4c495b4000
-[pid 38131] read(5, "processor\t: 0\nvendor_id\t: Genuin"..., 1024) = 819
-[pid 38131] read(5, "", 1024)           = 0
-[pid 38131] close(5)                    = 0
-[pid 38131] munmap(0x7f4c495b4000, 4096) = 0
-[pid 38131] writev(4, [{"C\3\0\0\0\0\0\0o\0\0\0\0\0\0\0", 16}, {"processor\t: 0\nvendor_id\t: Genuin"..., 819}], 2) = 835
-[pid 38131] read(4,  <unfinished ...>
-[pid 38311] <... read resumed> "P\0\0\0\17\0\0\0p\0\0\0\0\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 135168) = 80
-[pid 38311] write(1, " .................lxcfs_read.. p"..., 51 .................lxcfs_read.. path:/proc/cpuinfo
-) = 51
-[pid 38311] writev(4, [{"\20\0\0\0\0\0\0\0p\0\0\0\0\0\0\0", 16}, {"", 0}], 2) = 16
-[pid 38311] read(4,  <unfinished ...>
-[pid 38310] <... read resumed> "@\0\0\0\31\0\0\0q\0\0\0\0\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 135168) = 64
-[pid 38310] writev(4, [{"\20\0\0\0\0\0\0\0q\0\0\0\0\0\0\0", 16}], 1) = 16
-[pid 38310] read(4,  <unfinished ...>
-[pid 38312] <... read resumed> "@\0\0\0\22\0\0\0r\0\0\0\0\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 135168) = 64
-[pid 38312] writev(4, [{"\20\0\0\0\0\0\0\0r\0\0\0\0\0\0\0", 16}], 1) = 16
-[pid 38312] read(4, 
-
-*/
 static int lxcfs_read(const char *path, char *buf, size_t size, off_t offset,
 		struct fuse_file_info *fi)
 {
 	int ret;
-
 	if (strncmp(path, "/cgroup", 7) == 0) {
 		up_users();
 		ret = do_cg_read(path, buf, size, offset, fi);
@@ -1028,34 +962,7 @@ static int set_pidfile(char *pidfile)
 	return fd;
 }
 
-/*
-
- LXCFS主进程
-
-LXCFS实现的main函数非常简单。在其main函数中可以看到，运行lxcfs时，首先会通过cgfs_setup_controllers入口函数进行初始化,大致步骤：
-
-创建运行时工作目录/run/lxcfs/controllers/
-将tmpfs文件系统挂载在/run/lxcfs/controllers/
-检查当前系统已挂载的所有cgroup子系统
-
-将当前系统各个cgroup子系统重新挂载在/run/lxcfs/controllers/目录下然后调用libfuse库主函数fuse_main，
-指定一个用户态文件系统挂载的目标目录(例如:/var/lib/lxcfs/)，并传递如下参数:
-
--s is required to turn off multi-threading as libnih-dbus isn't thread safe.
--f is to keep lxcfs running in the foreground
--o allow_other is required to have non-root user be able to access the filesystem
-*/
-
-/*
-[root@localhost lib]# ls /usr/local/var/lib/lxcfs/cgroup/
-blkio/            cpuacct,cpu/      cpuset/           devices/          freezer/          hugetlb/          memory/           name=systemd/     net_prio,net_cls/ perf_event/       pids/             
-[root@localhost lib]# ls /usr/local/var/lib/lxcfs/proc/
-cpuinfo    diskstats  meminfo    stat       swaps      uptime    //主要是容器读取改容器自己的这些信息   
-[root@localhost lib]# ls /usr/local/var/lib/lxcfs/proc/
-*/
-
 //参考http://way.xiaojukeji.com/article/4661
-//http://blog.sae.sina.com.cn/archives/2308
 int main(int argc, char *argv[])
 {
 	int ret = -1, pidfd;
@@ -1114,7 +1021,6 @@ int main(int argc, char *argv[])
 	if ((pidfd = set_pidfile(pidfile)) < 0)
 		goto out;
 
-  
 	ret = fuse_main(nargs, newargv, &lxcfs_ops, NULL);
 
 	dlclose(dlopen_handle);

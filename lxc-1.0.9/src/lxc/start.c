@@ -989,7 +989,9 @@ static int lxc_spawn(struct lxc_handler *handler)
 	flags = handler->clone_flags;
 	if (handler->clone_flags & CLONE_NEWUSER)
 		flags &= ~CLONE_NEWNET;
-    
+
+    printf("yang test...., lxc-start clone flags:0x%x\r\n", handler->clone_flags);
+    while(1);
 	handler->pid = lxc_clone(do_start, handler, handler->clone_flags);
 	if (handler->pid < 0) {
 		SYSERROR("failed to fork into a new namespace");

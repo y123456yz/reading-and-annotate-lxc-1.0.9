@@ -214,6 +214,7 @@ int main(int argc, char *argv[])
 		"/sbin/init",
 		NULL,
 	};
+	printf("yang test 11111 lxc start\r\n");
 	struct lxc_container *c;
 
 	lxc_list_init(&defines);

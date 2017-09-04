@@ -54,6 +54,7 @@ getline(char **outbuf, size_t *outsize, FILE *fp)
         *outbuf = tmp;
         *outsize = len + 1;
     }
+    
     memcpy(*outbuf, buf, len);
     (*outbuf)[len] = '\0';
     return (len);

@@ -43,14 +43,14 @@ enum {
 	LXC_TYPE_PROC_SWAPS,
 };
 
-struct file_info {
+struct file_info { //分配空间见proc_open，获取文件meminfo stat等文件内容前，先计算文件内容大小
 	char *controller;
 	char *cgroup;
 	char *file;
 	int type;
 	char *buf;  // unused as of yet
-	int buflen;
-	int size; //actual data size
+	int buflen;  //空间总大小
+	int size; //actual data size  填充的数据长度
 	int cached;
 };
 
@@ -767,6 +767,9 @@ bool cgfs_get_value(const char *controller, const char *cgroup, const char *file
 	snprintf(fnam, len, "%s/%s/%s/%s", basedir, tmpc, cgroup, file);
 
 	*value = slurp_file(fnam);
+	// 例如容器中cat /proc/uptime,这里为 /run/lxcfs/controllers/cpuacct,cpu//lxc/yyztestttt/cpuacct.usage
+	//printf("yang test ......... cgfs get value, fname:%s, value:%s\r\n", fnam, *value);
+	
 	return *value != NULL;
 }
 
@@ -879,6 +882,7 @@ static void write_task_init_pid_exit(int sock, pid_t target)
 	if (ret < 0 || ret >= sizeof(fnam))
 		_exit(1);
 
+    printf("yang test write_task_init_pid_exit fnam:%s\r\n", fnam);
 	fd = open(fnam, O_RDONLY);
 	if (fd < 0) {
 		perror("write_task_init_pid_exit open of ns/pid");
@@ -957,6 +961,8 @@ static pid_t lookup_initpid_in_store(pid_t qpid)
 
 	snprintf(fnam, 100, "/proc/%d/ns/pid", qpid);
 	store_lock();
+
+	printf("yang test lookup_initpid_in_store fnam:%s\r\n", fnam);
 	if (stat(fnam, &sb) < 0)
 		goto out;
 	e = lookup_verify_initpid(&sb);
@@ -2062,6 +2068,8 @@ static void pid_to_ns_wrapper(int sock, pid_t tpid)
 	ret = snprintf(fnam, sizeof(fnam), "/proc/%d/ns/pid", tpid);
 	if (ret < 0 || ret >= sizeof(fnam))
 		_exit(1);
+
+	printf("yang test pid_to_ns_wrapper fnam:%s\r\n", fnam);
 	newnsfd = open(fnam, O_RDONLY);
 	if (newnsfd < 0)
 		_exit(1);
@@ -2299,6 +2307,8 @@ static void pid_from_ns_wrapper(int sock, pid_t tpid)
 	ret = snprintf(fnam, sizeof(fnam), "/proc/%d/ns/pid", tpid);
 	if (ret < 0 || ret >= sizeof(fnam))
 		_exit(1);
+
+	printf("yang test pid_from_ns_wrapper fnam:%s\r\n", fnam);
 	newnsfd = open(fnam, O_RDONLY);
 	if (newnsfd < 0)
 		_exit(1);
@@ -2903,7 +2913,6 @@ static unsigned long get_memlimit(const char *cgroup)
 	return memlimit;
 }
 
-//获取cgroup目录及其子目录中 memory.limit_in_bytes的最小值
 static unsigned long get_min_memlimit(const char *cgroup)
 {
 	char *copy = strdupa(cgroup);
@@ -2938,6 +2947,12 @@ static int proc_meminfo_read(char *buf, size_t size, off_t offset,
 	size_t cache_size = d->buflen;
 	FILE *f = NULL;
 
+    /*
+    容器中cat /proc/meminfo的打印如下:
+    yang test ......proc_open.... size:1454, type:2
+    yang test .... size:65536, offset:0, cache_size:1454, d->size:1454
+    yang test .... size:65536, offset:1195, cache_size:1454, d->size:1195
+    */
 	if (offset){
 		if (offset > d->size)
 			return -EINVAL;
@@ -2952,20 +2967,13 @@ static int proc_meminfo_read(char *buf, size_t size, off_t offset,
 	pid_t initpid = lookup_initpid_in_store(fc->pid);
 	if (initpid <= 0)
 		initpid = fc->pid;
-		
-    //如果在容器中cat /proc/meminfo,则这里initpid为容器/sbin/init进程号，如果在主机中cat /usr/local/var/lib/lxcfs/proc/meminfo
-    //initpid为主机的进程号1，  这里的getpid为lxcfs进程号
-	//fprintf(stderr, "yang test ....... initpid:%d, pid:%d, getpid:%d\r\n", initpid, fc->pid, getpid());
 	cg = get_pid_cgroup(initpid, "memory");
-
-	//fprintf(stderr, "yang test .....CG:%s\n", cg);
-	//yang test .....CG:/lxc/yyz-test-49   主机中cat这里为/， 容器中cat这里为/lxc/yyz-test
 	if (!cg)
 		return read_file("/proc/meminfo", buf, size, d);
-
+		
 	prune_init_slice(cg);
 
-	memlimit = get_min_memlimit(cg); //获取cgroup目录及其子目录中 memory.limit_in_bytes的最小值
+	memlimit = get_min_memlimit(cg);
 	if (!cgfs_get_value("memory", cg, "memory.usage_in_bytes", &memusage_str))
 		goto err;
 	if (!cgfs_get_value("memory", cg, "memory.stat", &memstat_str))
@@ -3004,10 +3012,12 @@ static int proc_meminfo_read(char *buf, size_t size, off_t offset,
 	if (!f)
 		goto err;
 
-	while (getline(&line, &linelen, f) != -1) {
+	while (getline(&line, &linelen, f) != -1) { //注意使用libc的getline可能会失败，
 		size_t l;
 		char *printme, lbuf[100];
 
+        printf("yang test line:%s\r\n", line);
+        
 		memset(lbuf, 0, 100);
 		if (startswith(line, "MemTotal:")) {
 			sscanf(line+14, "%lu", &hosttotal);
@@ -3061,12 +3071,15 @@ static int proc_meminfo_read(char *buf, size_t size, off_t offset,
 		total_len += l;
 	}
 
+	if (errno > 0) {
+	    printf("read mem proc, getline error. errno[%s] file[%s]\n", strerror(errno), "xxx");  
+	}	
+
 	d->cached = 1;
 	d->size = total_len;
 	if (total_len > size ) total_len = size;
 	memcpy(buf, d->buf, total_len);
-	//打印结果就是cat获取到的内容
-    //fprintf(stderr, "yang test .....buf:%s\n", buf);
+
 	rv = total_len;
 err:
 	if (f)
@@ -3265,11 +3278,16 @@ static int proc_stat_read(char *buf, size_t size, off_t offset,
 		goto err;
 
 	//skip first line
-	if (getline(&line, &linelen, f) < 0) {
+	/*
+    messages-20170821:Aug 17 19:52:38 ob-slave-17 lxcfs[15339]: proc_stat_read read first line failed.
+    messages-20170821:Aug 20 09:37:01 ob-slave-17 lxcfs[15339]: proc_stat_read read first line failed.
+	 */
+	if (getline(&line, &linelen, f) < 0) { //这里出现过报错的情况
 		fprintf(stderr, "proc_stat_read read first line failed\n");
 		goto err;
 	}
 
+    //把第一行总CPU信息以外的其他信息求和，重新放回第一行
 	while (getline(&line, &linelen, f) != -1) {
 		size_t l;
 		int cpu;
@@ -3377,16 +3395,20 @@ static long int getreaperage(pid_t pid)
 	if (qpid <= 0)
 		return 0;
 
+
 	ret = snprintf(fnam, 100, "/proc/%d", qpid);
 	if (ret < 0 || ret >= 100)
 		return 0;
 
+    //printf("yang test .... fnam:%s\r\n", fnam);  容器的init进程
+    
 	if (lstat(fnam, &sb) < 0)
 		return 0;
 
 	return time(NULL) - sb.st_ctime;
 }
 
+//  /run/lxcfs/controllers/cpuacct,cpu//lxc/yyztestttt/cpuacct.usage
 static unsigned long get_reaper_busy(pid_t task)
 {
 	pid_t initpid = lookup_initpid_in_store(task);
@@ -3440,7 +3462,7 @@ static int proc_uptime_read(char *buf, size_t size, off_t offset,
 {
 	struct fuse_context *fc = fuse_get_context();
 	struct file_info *d = (struct file_info *)fi->fh;
-	long int reaperage = getreaperage(fc->pid);
+	long int reaperage = getreaperage(fc->pid); //计算主机中 /proc/容器init进程号创建时间距离现在多久，也就是容器跑了多久了，
 	unsigned long int busytime = get_reaper_busy(fc->pid), idletime;
 	char *cache = d->buf;
 	size_t total_len = 0;
@@ -3449,14 +3471,17 @@ static int proc_uptime_read(char *buf, size_t size, off_t offset,
 	iwashere();
 #endif
 
-	if (offset){
+	if (offset) {
 		if (offset > d->size)
 			return -EINVAL;
+			
 		if (!d->cached)
 			return 0;
+			
 		int left = d->size - offset;
 		total_len = left > size ? size: left;
 		memcpy(buf, cache + offset, total_len);
+		
 		return total_len;
 	}
 
@@ -3737,8 +3762,28 @@ static off_t get_procfile_size(const char *which)
 	if (!f)
 		return 0;
 
+    /*
+    open("/proc/meminfo", O_RDONLY)         = 5
+    fstat(5, {st_mode=S_IFREG|0444, st_size=0, ...}) = 0
+    mmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7fc0574ea000
+    read(5, "MemTotal:        2899436 kB\nMemF"..., 1024) = 1024
+    read(5, "Total:       0\nHugePages_Free:  "..., 1024) = 174
+    read(5, "", 1024)                       = 0
+    write(1, "getline error. errno[No such fil"..., 68) = 68
+    close(5)       
+
+    注意使用glibc中的getline可能会是吧，从内核读取文件内容是没问题的，问题出在glibc里面一行一行解析的时候
+
+    可以自己实现一个getline函数
+    */
 	while ((sz = getline(&line, &len, f)) != -1)
 		answer += sz;
+		
+	if (errno > 0) {
+	    printf("getline error. errno[%s] file[%s]\n", strerror(errno), which);
+	    answer = 0;    
+	}	
+	
 	fclose (f);
 	free(line);
 
@@ -3788,7 +3833,7 @@ int proc_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offs
 }
 
 int proc_open(const char *path, struct fuse_file_info *fi)
-{
+{//分配空间见proc_open，获取文件meminfo stat等文件内容前，先计算文件内容大小
 	int type = -1;
 	struct file_info *info;
 
@@ -3840,7 +3885,6 @@ int proc_release(const char *path, struct fuse_file_info *fi)
 	return 0;
 }
 
-//cpuinfo    diskstats  meminfo    stat       swaps      uptime   读取
 int proc_read(const char *path, char *buf, size_t size, off_t offset,
 		struct fuse_file_info *fi)
 {
